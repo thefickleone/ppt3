@@ -33,10 +33,13 @@ Pages run from `0` to `11`:
 
 - Clean visual-only physics scene in `#scene`
 - Dedicated story panel layer in `#storyPanel` (`#title`, `#subtitle`, `#explanation`)
+- Unified `16:9` canvas wrapper (`.presentation-canvas`) so text and scene share one layout space
 - Page-synced chapter explanation with smooth fade transitions
 - Full page-based chapter system (`0-11`) with explicit `page*` render functions
 - Current-direction arrows, Lenz resistance behavior, and energy-flow arrows
 - Streamlined simulation animation with reduced rendering overhead
+- Card/image-first pages for applications and eddy-current examples
+- Split runtime state into `physicsState` and `uiState` for cleaner animation control
 
 ## Run locally
 
