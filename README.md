@@ -10,8 +10,8 @@ Single-scene, keyboard-controlled browser presentation for Engineering Physics (
 
 ## Controls
 
-- `ArrowRight` or `Space`: next step
-- `ArrowLeft`: previous step
+- `ArrowRight` or `Space`: next dialogue line (then next step after last line)
+- `ArrowLeft`: previous dialogue line (or previous step last line)
 - `R`: reload
 
 Steps run from `0` to `5`:
@@ -28,6 +28,7 @@ Steps run from `0` to `5`:
 - Clean visual-only physics scene in `#scene`
 - Dedicated explanation layer in `#overlay` (`#explanation`)
 - Step-synced one-line presenter explanation with smooth fade transitions
+- Full script system with per-step `lines[]` dialogue progression
 
 ## Run locally
 
