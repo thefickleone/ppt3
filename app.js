@@ -26,9 +26,14 @@
 
   const state = {
     step: 0,
+    transitionToken: 0,
     currentOffset: 0,
     currentSpeed: 0,
+    currentSpeedTarget: 0,
     generatorSpin: 0,
+    rodBaseX: 140,
+    lenzPhase: 0,
+    overlayTimer: null,
     lastTs: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
   };
@@ -69,7 +74,14 @@
     });
     arrowMarker.append(svgEl("path", { d: "M0,0 L10,5 L0,10 z", fill: "#6af2ff" }));
 
-    defs.append(glow, arrowMarker);
+    const rodGradient = svgEl("linearGradient", { id: "rodGradient", x1: "0%", y1: "0%", x2: "100%", y2: "0%" });
+    rodGradient.append(
+      svgEl("stop", { offset: "0%", "stop-color": "#6ea7ff" }),
+      svgEl("stop", { offset: "55%", "stop-color": "#9fd0ff" }),
+      svgEl("stop", { offset: "100%", "stop-color": "#6ea7ff" })
+    );
+
+    defs.append(glow, arrowMarker, rodGradient);
     svg.append(defs);
 
     const magneticField = makeAnim(svgEl("g", { id: "magneticField" }), 0.2);
@@ -109,7 +121,7 @@
     }
 
     const equation = makeAnim(svgEl("text", { id: "equation", x: "600", y: "250", "text-anchor": "middle" }), 0);
-    equation.textContent = "e = B l v";
+    equation.textContent = "ε = Bℓv";
 
     const circuitPath = makeAnim(
       svgEl("path", {
@@ -176,15 +188,46 @@
 
   function setOverlay() {
     const copy = STEP_COPY[state.step];
-    elements.title.textContent = copy.title;
-    elements.subtitle.textContent = copy.subtitle;
+    elements.presentation.classList.add("overlay-out");
+    if (state.overlayTimer) {
+      window.clearTimeout(state.overlayTimer);
+    }
+    state.overlayTimer = window.setTimeout(() => {
+      elements.title.textContent = copy.title;
+      elements.subtitle.textContent = copy.subtitle;
+      elements.presentation.classList.remove("overlay-out");
+    }, state.reducedMotion ? 0 : 170);
   }
 
-  function setStep(nextStep) {
-    state.step = Math.max(0, Math.min(MAX_STEP, nextStep));
-    elements.stepValue.textContent = `${state.step} / ${MAX_STEP}`;
-    elements.presentation.dataset.step = String(state.step);
-    renderStep();
+  function setStep(nextStep, instant = false) {
+    const clamped = Math.max(0, Math.min(MAX_STEP, nextStep));
+    if (clamped === state.step && !instant) return;
+
+    const token = ++state.transitionToken;
+    scene.equation.classList.remove("pulse");
+    scene.skyline.classList.remove("lights-on");
+    scene.circuitPath.classList.remove("drawn");
+    elements.presentation.classList.add("scene-transitioning");
+
+    // Transition-out phase keeps continuity but reduces visual clutter.
+    if (!instant) {
+      scene.electricField.style.opacity = "0";
+      scene.equation.style.opacity = "0";
+      scene.lenzGroup.style.opacity = "0";
+      scene.generator.style.opacity = state.step === 5 ? "0.35" : scene.generator.style.opacity;
+      scene.skyline.style.opacity = state.step === 5 ? "0.25" : scene.skyline.style.opacity;
+      state.currentSpeedTarget = 0;
+    }
+
+    const delay = instant || state.reducedMotion ? 0 : 260;
+    window.setTimeout(() => {
+      if (token !== state.transitionToken) return;
+      state.step = clamped;
+      elements.stepValue.textContent = `${state.step} / ${MAX_STEP}`;
+      elements.presentation.dataset.step = String(state.step);
+      renderStep();
+      elements.presentation.classList.remove("scene-transitioning");
+    }, delay);
   }
 
   function setTranslate(node, x, y, rotate = 0) {
@@ -198,22 +241,32 @@
     });
   }
 
+  function reveal(node, opacity, delay = 0) {
+    node.style.transitionDelay = `${delay}ms`;
+    node.style.opacity = String(opacity);
+  }
+
+  function setFocus(levels) {
+    reveal(scene.magneticField, levels.magnetic ?? 0.18, 0);
+    reveal(scene.rodGroup, levels.rod ?? 0, 70);
+    reveal(scene.electricField, levels.electric ?? 0, 120);
+    reveal(scene.equation, levels.equation ?? 0, 180);
+    reveal(scene.circuitPath, levels.circuit ?? 0, 140);
+    reveal(scene.currentParticles, levels.current ?? 0, 220);
+    reveal(scene.lenzGroup, levels.lenz ?? 0, 170);
+    reveal(scene.generator, levels.generator ?? 0, 140);
+    reveal(scene.skyline, levels.skyline ?? 0, 240);
+  }
+
   function resetVisuals() {
-    scene.magneticField.style.opacity = "0.2";
-    scene.rodGroup.style.opacity = "0";
-    scene.electricField.style.opacity = "0";
-    scene.equation.style.opacity = "0";
+    setFocus({ magnetic: 0.2, rod: 0, electric: 0, equation: 0, circuit: 0, current: 0, lenz: 0, generator: 0, skyline: 0 });
     scene.equation.classList.remove("pulse");
-    scene.circuitPath.style.opacity = "0";
     scene.circuitPath.classList.remove("drawn");
-    scene.currentParticles.style.opacity = "0";
-    scene.lenzGroup.style.opacity = "0";
-    scene.generator.style.opacity = "0";
-    scene.skyline.style.opacity = "0";
     scene.skyline.classList.remove("lights-on");
-    scene.negCap.style.opacity = "0";
-    scene.posCap.style.opacity = "0";
-    setTranslate(scene.rodGroup, 140, 320, 0);
+    reveal(scene.negCap, 0, 120);
+    reveal(scene.posCap, 0, 180);
+    state.rodBaseX = 140;
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
     setTranslate(scene.generator, 0, 0, state.generatorSpin);
     setElectronShift(0);
     elements.title.classList.remove("intro-title");
@@ -221,58 +274,53 @@
   }
 
   function intro() {
+    setFocus({ magnetic: 0.32 });
     elements.title.classList.add("intro-title");
     elements.subtitle.classList.add("intro-subtitle");
-    scene.magneticField.style.opacity = "0.28";
   }
 
   function chargeSeparation() {
-    scene.magneticField.style.opacity = "0.52";
-    scene.rodGroup.style.opacity = "1";
-    scene.negCap.style.opacity = "0.9";
-    scene.posCap.style.opacity = "0.9";
-    setTranslate(scene.rodGroup, 440, 320, 0);
+    setFocus({ magnetic: 0.5, rod: 1 });
+    state.rodBaseX = 440;
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+    reveal(scene.negCap, 1, 280);
+    reveal(scene.posCap, 1, 380);
     setElectronShift(36);
   }
 
   function emf() {
     chargeSeparation();
-    scene.electricField.style.opacity = "1";
-    scene.equation.style.opacity = "1";
+    setFocus({ magnetic: 0.42, rod: 0.95, electric: 1, equation: 1 });
     scene.equation.classList.add("pulse");
-    scene.equation.style.transform = "translate(0px, 0px) scale(1)";
+    scene.equation.style.transform = "translate(0px, 0px) scale(1.03)";
   }
 
   function current() {
     emf();
-    scene.circuitPath.style.opacity = "1";
+    setFocus({ magnetic: 0.32, rod: 0.92, electric: 0.8, equation: 1, circuit: 1, current: 1 });
     scene.circuitPath.classList.add("drawn");
-    scene.currentParticles.style.opacity = "1";
-    state.currentSpeed = 150;
+    state.currentSpeedTarget = 155;
   }
 
   function lenz() {
     current();
-    scene.lenzGroup.style.opacity = "1";
-    setTranslate(scene.rodGroup, 410, 320, 0);
-    state.currentSpeed = 230;
+    setFocus({ magnetic: 0.3, rod: 0.95, electric: 0.74, equation: 0.82, circuit: 1, current: 1, lenz: 1 });
+    state.rodBaseX = 410;
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+    state.currentSpeedTarget = 230;
   }
 
   function applications() {
     lenz();
-    scene.electricField.style.opacity = "0";
-    scene.equation.style.opacity = "0";
-    scene.lenzGroup.style.opacity = "0";
-    scene.rodGroup.style.opacity = "0";
-    scene.generator.style.opacity = "1";
-    scene.skyline.style.opacity = "1";
+    setFocus({ magnetic: 0.24, rod: 0, electric: 0, equation: 0, circuit: 0.45, current: 1, lenz: 0, generator: 1, skyline: 1 });
+    reveal(scene.rodGroup, 0, 120);
     scene.skyline.classList.add("lights-on");
-    state.currentSpeed = 280;
+    state.currentSpeedTarget = 280;
   }
 
   function renderStep() {
     setOverlay();
-    state.currentSpeed = 0;
+    state.currentSpeedTarget = 0;
     resetVisuals();
     if (state.step === 0) intro();
     if (state.step === 1) chargeSeparation();
@@ -287,6 +335,8 @@
     const dt = Math.min((ts - state.lastTs) / 1000, 0.04);
     state.lastTs = ts;
 
+    state.currentSpeed += (state.currentSpeedTarget - state.currentSpeed) * Math.min(1, dt * 5.5);
+
     if (state.step >= 3) {
       state.currentOffset = (state.currentOffset + state.currentSpeed * dt) % scene.circuitLen;
       const spacing = scene.circuitLen / scene.particles.length;
@@ -295,6 +345,12 @@
         particle.setAttribute("cx", point.x.toFixed(2));
         particle.setAttribute("cy", point.y.toFixed(2));
       });
+    }
+
+    if (state.step === 4) {
+      state.lenzPhase += dt * 24;
+      const resistance = Math.sin(state.lenzPhase) * (state.reducedMotion ? 0 : 2.4);
+      setTranslate(scene.rodGroup, state.rodBaseX + resistance, 320, 0);
     }
 
     if (state.step === 5) {
@@ -321,7 +377,7 @@
     }
   });
 
-  setStep(0);
+  setStep(0, true);
   window.requestAnimationFrame(animateFrame);
 })();
 
