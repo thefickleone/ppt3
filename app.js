@@ -21,18 +21,14 @@
       baseFillOpacity: 0.08,
       fillOpacityRange: 0.3
     },
-    eddyField: {
-      leftX: 540,
-      rightX: 720
-    },
-    slider: {
-      minX: 40,
-      width: 600
+    simulation: {
+      velocity: 0.55
     }
   };
 
   const elements = {
     presentation: document.getElementById("presentation"),
+    scene: document.getElementById("scene"),
     svg: document.getElementById("sceneSvg"),
     bgGrid: document.querySelector("#background .bg-grid"),
     bgGradient: document.querySelector("#background .bg-gradient"),
@@ -40,20 +36,12 @@
     subtitle: document.getElementById("subtitle"),
     stepValue: document.getElementById("stepValue"),
     explanation: document.getElementById("explanation"),
-    velocitySlider: document.getElementById("velocitySlider"),
-    velocityValue: document.getElementById("velocityValue"),
-    velocityControl: document.getElementById("velocityControl"),
-    velocityActive: document.getElementById("velocityActive"),
-    velocityThumb: document.getElementById("velocityThumb"),
-    velocityThumbGlow: document.getElementById("velocityThumbGlow"),
     applicationCards: Array.from(document.querySelectorAll("#applicationCards .app-card"))
   };
 
   if (
-    !elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
+    !elements.presentation || !elements.scene || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
     !elements.bgGrid || !elements.bgGradient ||
-    !elements.velocitySlider || !elements.velocityValue ||
-    !elements.velocityControl || !elements.velocityActive || !elements.velocityThumb || !elements.velocityThumbGlow ||
     elements.applicationCards.length === 0
   ) {
     return;
@@ -70,19 +58,15 @@
     currentChargeShift: 0,
     rodBaseX: 140,
     motionPhase: 0,
-    simulationVelocity: 0.55,
     simulationTravel: 0,
     eddyPosition: 560,
-    eddyVelocity: 0,
     eddyPulse: 0,
-    eddyPrevOverlap: 0,
     lenzPhase: 0,
     energyPhase: 0,
     overlayTimer: null,
     transitionTimer: null,
     isTransitioning: false,
     inputCooldownUntil: 0,
-    sliderDragging: false,
     parallaxTargetX: 0,
     parallaxTargetY: 0,
     parallaxX: 0,
@@ -133,7 +117,7 @@
     {
       title: "Simulation View",
       subtitle: "Full setup before current",
-      explanation: "Use the velocity slider: higher v increases rod speed, charge separation, and EMF intensity.",
+      explanation: "Higher velocity increases rod speed, charge separation, and EMF intensity.",
       render: pageSimulation
     },
     {
@@ -492,6 +476,8 @@
       if (state.page === 6) {
         state.simulationTravel = 0;
       }
+      const noSvgPages = [1, 10, 11];
+      elements.scene.style.opacity = noSvgPages.includes(state.page) ? "0" : "1";
       updateProgressUI();
       elements.presentation.dataset.page = String(state.page);
       renderPage();
@@ -532,14 +518,6 @@
     scene.fluxArea.style.fillOpacity = String(CONFIG.flux.baseFillOpacity + intensity * CONFIG.flux.fillOpacityRange);
   }
 
-  function getEddyOverlap(rodX) {
-    const rodLeft = rodX;
-    const rodRight = rodX + 320;
-    const fieldLeft = CONFIG.eddyField.leftX;
-    const fieldRight = CONFIG.eddyField.rightX;
-    return Math.max(0, Math.min(rodRight, fieldRight) - Math.max(rodLeft, fieldLeft));
-  }
-
   function setTranslate(node, x, y, rotate = 0, scale = 1, depth = 0) {
     const px = state.parallaxX * depth;
     const py = state.parallaxY * depth;
@@ -569,32 +547,8 @@
     scene.capGlowPos.style.transform = `scale(${glowScale})`;
   }
 
-  function updateSimulationUI() {
-    elements.velocityValue.textContent = state.simulationVelocity.toFixed(2);
-    const x = CONFIG.slider.minX + state.simulationVelocity * CONFIG.slider.width;
-    elements.velocityActive.setAttribute("x2", x.toFixed(2));
-    elements.velocityThumb.setAttribute("cx", x.toFixed(2));
-    elements.velocityThumbGlow.setAttribute("cx", x.toFixed(2));
-  }
-
-  function setSimulationVelocity(value) {
-    state.simulationVelocity = Math.max(0, Math.min(1, value));
-    elements.velocitySlider.value = String(Math.round(state.simulationVelocity * 100));
-    updateSimulationUI();
-    if (state.page === 6) {
-      updateSimulationFromVelocity(0);
-    }
-  }
-
-  function updateVelocityFromPointer(clientX) {
-    const rect = elements.velocityControl.getBoundingClientRect();
-    if (rect.width <= 0) return;
-    const t = (clientX - rect.left) / rect.width;
-    setSimulationVelocity(t);
-  }
-
   function updateSimulationFromVelocity(dt = 0) {
-    const v = state.simulationVelocity;
+    const v = CONFIG.simulation.velocity;
     const separation = 0.28 + v * 0.72;
 
     if (dt > 0) {
@@ -680,9 +634,7 @@
     state.motionPhase = 0;
     state.simulationTravel = 0;
     state.eddyPosition = 560;
-    state.eddyVelocity = 0;
     state.eddyPulse = 0;
-    state.eddyPrevOverlap = 0;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
     setTranslate(scene.generator, 0, 0, state.generatorSpin, 1, 0.8);
     setElectronShift(0);
@@ -783,9 +735,7 @@
   function pageEddy() {
     setFocus({ magnetic: 0.14, eddyField: 1, rod: 1, electric: 0.06, circuit: 0.1, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 0.2, generator: 0, skyline: 0.04 });
     state.eddyPosition = 420;
-    state.eddyVelocity = 220;
     state.eddyPulse = 0;
-    state.eddyPrevOverlap = getEddyOverlap(state.eddyPosition);
     state.currentSpeedTarget = 0;
     scene.circuitPath.style.opacity = "0.12";
     scene.skyline.classList.remove("lights-on");
@@ -810,7 +760,7 @@
 
     if (state.page === 6) {
       updateSimulationFromVelocity(dt);
-      state.currentSpeedTarget = 42 + state.simulationVelocity * 84;
+      state.currentSpeedTarget = 42 + CONFIG.simulation.velocity * 84;
     }
 
     if (state.page >= 7) {
@@ -858,25 +808,11 @@
     }
 
     if (state.page === 11) {
-      const overlap = getEddyOverlap(state.eddyPosition);
-      const entered = state.eddyPrevOverlap === 0 && overlap > 0;
-      const exited = state.eddyPrevOverlap > 0 && overlap === 0;
-      if (entered || exited) {
-        state.eddyPulse = 1;
-        state.eddyVelocity *= 0.72;
-      }
-      state.eddyPrevOverlap = overlap;
-
-      state.eddyPulse = Math.max(0, state.eddyPulse - dt * 1.25);
-      state.eddyVelocity = Math.max(18, state.eddyVelocity - dt * 16);
-      state.eddyPosition += dt * state.eddyVelocity;
-      if (state.eddyPosition > 780) {
-        state.eddyPosition = 780;
-      }
+      state.eddyPulse += dt * (state.reducedMotion ? 1.2 : 2.6);
+      const pulse = state.reducedMotion ? 0.55 : 0.5 + 0.5 * Math.sin(state.eddyPulse);
       setTranslate(scene.rodGroup, state.eddyPosition, 320, 0, 1, 1.05);
-      const eddyVis = (overlap > 0 ? 0.22 : 0.08) + state.eddyPulse * 0.78;
-      scene.eddyLoops.style.opacity = String(Math.min(1, eddyVis));
-      scene.eddyLoops.style.transform = `translate(0px, 0px) scale(${0.94 + state.eddyPulse * 0.2})`;
+      scene.eddyLoops.style.opacity = String(0.12 + pulse * 0.5);
+      scene.eddyLoops.style.transform = `translate(0px, 0px) scale(${0.95 + pulse * 0.12})`;
     }
 
     const ambientX = Math.sin(ts * 0.00023) * 5;
@@ -927,24 +863,6 @@
     }
   });
 
-  elements.velocitySlider.addEventListener("input", () => {
-    setSimulationVelocity(Number(elements.velocitySlider.value) / 100);
-  });
-
-  elements.velocityControl.addEventListener("mousedown", (event) => {
-    state.sliderDragging = true;
-    updateVelocityFromPointer(event.clientX);
-  });
-
-  window.addEventListener("mousemove", (event) => {
-    if (!state.sliderDragging) return;
-    updateVelocityFromPointer(event.clientX);
-  });
-
-  window.addEventListener("mouseup", () => {
-    state.sliderDragging = false;
-  });
-
   elements.applicationCards.forEach((card) => {
     card.addEventListener("click", () => setActiveApplicationCard(card));
     card.addEventListener("keydown", (event) => {
@@ -957,7 +875,6 @@
 
   setActiveApplicationCard(elements.applicationCards[0]);
 
-  setSimulationVelocity(state.simulationVelocity);
 
   setPage(0, true);
   window.requestAnimationFrame(animateFrame);

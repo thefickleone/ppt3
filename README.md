@@ -13,7 +13,6 @@ Single-scene, keyboard-controlled browser presentation for Engineering Physics (
 - `ArrowRight` or `Space`: next page
 - `ArrowLeft`: previous page
 - `R`: reload
-- Page 6 includes an interactive `Velocity (v)` slider
 
 Pages run from `0` to `11`:
 
@@ -37,7 +36,7 @@ Pages run from `0` to `11`:
 - Page-synced chapter explanation with smooth fade transitions
 - Full page-based chapter system (`0-11`) with explicit `page*` render functions
 - Current-direction arrows, Lenz resistance behavior, and energy-flow arrows
-- Interactive simulation page showing how `v` changes rod speed, charge separation, and EMF intensity
+- Streamlined simulation animation with reduced rendering overhead
 
 ## Run locally
 
