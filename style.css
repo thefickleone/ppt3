@@ -6,6 +6,8 @@
   --text-secondary: #a5b8d6;
   --cyan: #59f3ff;
   --cyan-glow: rgba(89, 243, 255, 0.45);
+  --red: #ff5f6d;
+  --gold: #ffe58a;
 }
 
 * {
@@ -82,6 +84,8 @@ body {
   margin: 0;
   font-size: clamp(2.4rem, 6vw, 5rem);
   letter-spacing: 0.04em;
+  opacity: 0.72;
+  transition: opacity 700ms ease, transform 850ms ease;
   text-shadow: 0 0 24px var(--cyan-glow);
 }
 
@@ -90,6 +94,8 @@ body {
   font-size: clamp(1rem, 2.4vw, 1.65rem);
   color: var(--text-secondary);
   letter-spacing: 0.015em;
+  opacity: 0.72;
+  transition: opacity 700ms ease, transform 850ms ease;
 }
 
 #ui {
@@ -133,5 +139,175 @@ body {
   color: rgba(222, 233, 255, 0.72);
   text-align: center;
   text-shadow: 0 0 16px rgba(89, 243, 255, 0.2);
+}
+
+#presentation[data-step="0"] #title,
+#presentation[data-step="0"] #subtitle {
+  opacity: 1;
+}
+
+.intro-title {
+  transform: translateY(-8px);
+}
+
+.intro-subtitle {
+  transform: translateY(6px);
+}
+
+#sceneSvg {
+  --line-glow: drop-shadow(0 0 8px rgba(89, 243, 255, 0.42));
+}
+
+#sceneSvg .anim {
+  transition: opacity 850ms ease, transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: opacity, transform;
+}
+
+.magnetic-cross {
+  fill: rgba(124, 212, 255, 0.4);
+  font-size: 20px;
+  font-weight: 600;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+}
+
+.rod {
+  fill: #7db6ff;
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 1;
+  filter: var(--line-glow);
+}
+
+.rod-cap {
+  transition: opacity 700ms ease;
+  filter: var(--line-glow);
+}
+
+.cap-negative {
+  fill: rgba(89, 243, 255, 0.95);
+}
+
+.cap-positive {
+  fill: rgba(255, 95, 109, 0.95);
+}
+
+.electron {
+  fill: #9ef8ff;
+  filter: drop-shadow(0 0 4px rgba(89, 243, 255, 0.8));
+  transition: transform 900ms ease;
+}
+
+.ef-arrow {
+  stroke: #6af2ff;
+  stroke-width: 2;
+  opacity: 0.8;
+  filter: var(--line-glow);
+}
+
+#equation {
+  fill: #e8f6ff;
+  font-size: 52px;
+  letter-spacing: 0.08em;
+  font-family: "SF Pro Display", "Segoe UI", sans-serif;
+  text-transform: none;
+  text-shadow: 0 0 28px rgba(89, 243, 255, 0.36);
+}
+
+#equation.pulse {
+  animation: pulseEquation 1200ms ease-in-out infinite;
+}
+
+.circuit {
+  fill: none;
+  stroke: rgba(170, 196, 255, 0.82);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: var(--line-glow);
+  stroke-dasharray: 1300;
+  stroke-dashoffset: 1300;
+  transition: stroke-dashoffset 1100ms ease, opacity 700ms ease;
+}
+
+.circuit.drawn {
+  stroke-dashoffset: 0;
+}
+
+.current-dot {
+  fill: #9af7ff;
+  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.95));
+}
+
+.lenz-arrow {
+  stroke: #8ad8ff;
+  stroke-width: 5;
+  filter: var(--line-glow);
+}
+
+.lenz-label {
+  fill: #d4e8ff;
+  font-size: 22px;
+}
+
+.generator-ring {
+  fill: rgba(89, 243, 255, 0.12);
+  stroke: rgba(148, 222, 255, 0.95);
+  stroke-width: 5;
+  filter: drop-shadow(0 0 12px rgba(89, 243, 255, 0.65));
+}
+
+.generator-axis {
+  stroke: rgba(215, 242, 255, 0.95);
+  stroke-width: 4;
+}
+
+.building {
+  fill: rgba(27, 35, 56, 0.95);
+  stroke: rgba(136, 175, 255, 0.22);
+  stroke-width: 1;
+}
+
+.window {
+  fill: rgba(255, 229, 138, 0.15);
+  transition: fill 800ms ease;
+}
+
+.lights-on .window {
+  fill: rgba(255, 229, 138, 0.95);
+  animation: lightFlicker 1600ms ease-in-out infinite alternate;
+}
+
+@keyframes pulseEquation {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes lightFlicker {
+  0% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sceneSvg .anim,
+  .electron,
+  #title,
+  #subtitle,
+  .circuit,
+  .window {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
 }
 
