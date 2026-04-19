@@ -83,7 +83,7 @@
     { title: "What happens if this rod starts moving?", subtitle: "", explanation: "", layout: "center", render: pageRodQuestion },
     { title: "Motion and Separation", subtitle: "v x B pushes charges apart", explanation: "Chapter 4: As the rod moves, electrons drift and clear polarity builds at opposite ends.", layout: "right", render: pageMotion },
     { title: "EMF Formation", subtitle: "Internal field appears", explanation: "Chapter 5: As the swept flux area grows, changing magnetic flux drives a measurable EMF.", layout: "right", render: pageEMF },
-    { title: "Derivation", subtitle: "epsilon = B l v", explanation: "Chapter 6: Emphasize the relation between field strength, rod length, and speed.", layout: "left", render: pageDerivation },
+    { title: "Derivation", subtitle: "ε = Bℓv", explanation: "", layout: "center", render: pageDerivation },
     { title: "Simulation View", subtitle: "Full setup before current", explanation: "Higher velocity increases rod speed, charge separation, and EMF intensity.", layout: "right", render: pageSimulation },
     { title: "Current Flow", subtitle: "Closed loop conduction", explanation: "", layout: "left", render: pageCurrent },
     { title: "Lenz's Law", subtitle: "Opposition to change", explanation: "Chapter 9: Induced effects resist motion, slowing the rod unless extra work is supplied.", layout: "right", render: pageLenz },
@@ -420,7 +420,7 @@
       if (state.page === 6) {
         state.simulationTravel = 0;
       }
-      const noSvgPages = [1, 10, 11];
+      const noSvgPages = [1, 5, 10, 11];
       elements.scene.style.opacity = noSvgPages.includes(state.page) ? "0" : "1";
       updateProgressUI();
       elements.presentation.dataset.page = String(state.page);
@@ -644,9 +644,9 @@
   }
 
   function pageDerivation() {
-    pageEMF();
-    setElectricFieldArrow(true);
-    setFocus({ magnetic: 0.58, rod: 0.98, length: 1, velocity: 1, rodField: 1, emfCore: 1, flux: 1, electric: 1 });
+    state.currentSpeedTarget = 0;
+    setElectricFieldArrow(false);
+    setFocus({ magnetic: 0, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, flux: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 0, generator: 0, skyline: 0 });
     elements.presentation.dataset.emphasis = "equation";
   }
 
