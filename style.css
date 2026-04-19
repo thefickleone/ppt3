@@ -777,9 +777,32 @@ body {
   opacity: 0.94;
 }
 
+.lenz-field-line {
+  stroke: rgba(134, 220, 255, 0.8);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+.lenz-wave {
+  fill: none;
+  stroke: rgba(166, 231, 255, 0.78);
+  stroke-width: 1.8;
+  stroke-dasharray: 6 5;
+  opacity: 0.85;
+}
+
 #presentation[data-page="8"] .lenz-arrow {
   stroke: rgba(131, 224, 255, 1);
   stroke-width: 5.8;
+}
+
+#presentation[data-page="8"] .lenz-field-line {
+  animation: lenzFieldPulse 960ms ease-in-out infinite;
+}
+
+#presentation[data-page="8"] .lenz-wave {
+  animation: lenzWavePush 950ms ease-in-out infinite;
 }
 
 #presentation[data-page="8"] .rod {
@@ -1041,6 +1064,29 @@ body {
   }
 }
 
+@keyframes lenzFieldPulse {
+  0%,
+  100% {
+    opacity: 0.52;
+    stroke-width: 2;
+  }
+  50% {
+    opacity: 1;
+    stroke-width: 2.5;
+  }
+}
+
+@keyframes lenzWavePush {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 0.95;
+    transform: scale(1.08);
+  }
+}
+
 @keyframes coreTransfer {
   0%,
   100% {
@@ -1137,6 +1183,8 @@ body {
   .ef-arrow,
   .current-dot,
   .lenz-arrow,
+  .lenz-field-line,
+  .lenz-wave,
   .velocity-arrow,
   .rod-length-marker,
   .rod-field-arrow,

@@ -270,7 +270,13 @@
     }
 
     const lenzGroup = makeAnim(svgEl("g", { id: "lenzGroup" }), 0);
-    lenzGroup.append(svgEl("line", { x1: "820", y1: "255", x2: "690", y2: "255", class: "lenz-arrow", "marker-end": "url(#arrowHead)" }));
+    lenzGroup.append(
+      svgEl("line", { x1: "820", y1: "255", x2: "690", y2: "255", class: "lenz-arrow", "marker-end": "url(#arrowHead)" }),
+      svgEl("line", { x1: "760", y1: "284", x2: "680", y2: "284", class: "lenz-field-line" }),
+      svgEl("line", { x1: "764", y1: "306", x2: "684", y2: "306", class: "lenz-field-line" }),
+      svgEl("line", { x1: "768", y1: "328", x2: "688", y2: "328", class: "lenz-field-line" }),
+      svgEl("path", { d: "M760 294 C740 280, 716 280, 696 294 C716 308, 740 308, 760 294", class: "lenz-wave" })
+    );
 
     const loopDirection = makeAnim(svgEl("g", { id: "loopDirection" }), 0);
     loopDirection.append(
@@ -386,10 +392,8 @@
 
     // Transition-out phase keeps continuity but reduces visual clutter.
     if (!instant) {
-      scene.electricField.style.opacity = "0";
-      scene.lenzGroup.style.opacity = "0";
-      scene.generator.style.opacity = state.page >= 9 ? "0.35" : scene.generator.style.opacity;
-      scene.skyline.style.opacity = state.page >= 10 ? "0.25" : scene.skyline.style.opacity;
+      scene.generator.style.opacity = state.page >= 9 ? "0.5" : scene.generator.style.opacity;
+      scene.skyline.style.opacity = state.page >= 10 ? "0.35" : scene.skyline.style.opacity;
       state.currentSpeedTarget = 0;
     }
 
@@ -434,8 +438,8 @@
     scene.circuitPath.style.strokeDashoffset = String(dashTotal * (1 - progress));
   }
 
-  function setTranslate(node, x, y, rotate = 0) {
-    node.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
+  function setTranslate(node, x, y, rotate = 0, scale = 1) {
+    node.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`;
   }
 
   function applyChargeSeparationPhase(phase, useRevealDelay = false) {
@@ -526,6 +530,7 @@
     scene.circuitPath.style.strokeDashoffset = "1300";
     scene.skyline.classList.remove("lights-on");
     scene.lenzGroup.style.transform = "translate(0px, 0px) scale(1)";
+    scene.magneticField.style.transform = "translate(0px, 0px) scale(1, 1)";
     reveal(scene.negCap, 0, 120);
     reveal(scene.posCap, 0, 180);
     scene.capGlowNeg.style.opacity = "0";
@@ -545,14 +550,21 @@
   }
 
   function pageIntro() {
-    setFocus({ magnetic: 0.28, rod: 0 });
-    elements.title.classList.add("intro-title");
+    setFocus({ magnetic: 0.14, rod: 0.9, rodField: 0, emfCore: 0, electric: 0, circuit: 0.12, current: 0.12, direction: 0, lenz: 0, energy: 1, converter: 1, generator: 0.88, skyline: 0.08 });
+    // Morph the existing rod into the converter core so the world evolves continuously.
+    state.rodBaseX = 560;
+    setTranslate(scene.rodGroup, state.rodBaseX, 198, 0, 0.34);
+    setElectronShift(0);
+    scene.negCap.style.opacity = "0.65";
+    scene.posCap.style.opacity = "0.65";
     elements.subtitle.classList.add("intro-subtitle");
   }
 
   function pageExamples() {
     setFocus({ magnetic: 0.25, generator: 0.36, skyline: 0.2, energy: 0.24 });
     state.currentSpeedTarget = 42;
+    setFocus({ magnetic: 0.22, rod: 0.28, rodField: 0, emfCore: 0, electric: 0, circuit: 0.38, current: 0.88, direction: 0.78, lenz: 0, energy: 1, converter: 0, eddy: 0, generator: 1, skyline: 1 });
+    setTranslate(scene.rodGroup, 574, 206, 0, 0.24);
   }
 
   function pageRodQuestion() {
@@ -602,7 +614,7 @@
 
   function pageLenz() {
     pageCurrent();
-    setFocus({ magnetic: 0.3, rod: 0.95, electric: 0.72, circuit: 1, current: 1, direction: 1, lenz: 1 });
+    setFocus({ magnetic: 0.42, rod: 0.95, electric: 0.72, circuit: 1, current: 1, direction: 1, lenz: 1 });
     state.rodBaseX = 388;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
     state.currentSpeedTarget = 208;
@@ -666,10 +678,13 @@
     }
 
     if (state.page === 8) {
-      state.lenzPhase += dt * 20;
-      const resistance = Math.sin(state.lenzPhase) * (state.reducedMotion ? 0 : 1.7);
-      const drag = state.reducedMotion ? 0 : Math.sin(state.lenzPhase * 0.5) * 3.2;
-      setTranslate(scene.rodGroup, state.rodBaseX - Math.abs(drag) + resistance, 320, 0);
+      state.lenzPhase += dt * 3.2;
+      const opposition = state.reducedMotion ? 0.6 : (0.5 + 0.5 * Math.sin(state.lenzPhase));
+      scene.magneticField.style.transform = `translate(${-5 * opposition}px, 0px) scale(${1 - opposition * 0.02}, 1)`;
+      scene.magneticField.style.opacity = String(0.36 + opposition * 0.2);
+      scene.lenzGroup.style.transform = `translate(${-7 * opposition}px, -2px) scale(${1.06 + opposition * 0.05})`;
+      // Keep rod stable to avoid glitch-like jitter; opposition is shown by field deformation.
+      setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
     }
 
     if (state.page === 3) {
