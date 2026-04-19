@@ -144,6 +144,78 @@ body {
   transition: opacity 760ms ease-in-out, transform 820ms var(--ease-ui), filter 760ms ease-in-out;
 }
 
+#examplesCards {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  width: min(1040px, 90vw);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 20px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.example-card {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(110, 176, 250, 0.24);
+  background: rgba(6, 12, 26, 0.62);
+  transform: translateY(22px) scale(0.94);
+  opacity: 0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  transition: transform 760ms var(--ease-ui), opacity 760ms ease-in-out, box-shadow 360ms ease-in-out, border-color 360ms ease-in-out;
+}
+
+.example-card img {
+  width: 100%;
+  height: clamp(140px, 18vw, 220px);
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.92) contrast(1.04);
+}
+
+.example-card h3 {
+  margin: 0;
+  padding: 0.66rem 0.72rem 0.78rem;
+  font-size: clamp(0.9rem, 1.35vw, 1.06rem);
+  letter-spacing: 0.04em;
+  color: rgba(230, 240, 255, 0.94);
+}
+
+.example-card:hover {
+  border-color: rgba(113, 218, 255, 0.52);
+  box-shadow: 0 0 18px rgba(89, 243, 255, 0.22), 0 10px 24px rgba(0, 0, 0, 0.34);
+}
+
+#presentation[data-page="1"] #examplesCards {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#presentation[data-page="1"] .example-card {
+  opacity: 1;
+  transform: translateY(0px) scale(1);
+}
+
+#presentation[data-page="1"] .example-card:nth-child(1) {
+  transition-delay: 120ms;
+}
+
+#presentation[data-page="1"] .example-card:nth-child(2) {
+  transition-delay: 320ms;
+}
+
+#presentation[data-page="1"] .example-card:nth-child(3) {
+  transition-delay: 520ms;
+}
+
+#presentation[data-page="1"] #explanation {
+  opacity: 0;
+}
+
 #presentation[data-emphasis="equation"] #explanation,
 #presentation[data-emphasis="current"] #explanation,
 #presentation[data-emphasis="lenz"] #explanation {
@@ -529,6 +601,7 @@ body {
   #title,
   #subtitle,
   #explanation,
+  .example-card,
   .circuit,
   .window,
   .ef-arrow,

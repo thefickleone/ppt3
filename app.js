@@ -45,7 +45,7 @@
     {
       title: "Real-World Examples",
       subtitle: "Motion and electricity already surround us",
-      explanation: "Chapter 2: Fans, bike dynamos, and turbines all convert motion into electrical effects.",
+      explanation: "Generator, turbine, and dynamo are real systems using this same motional EMF principle.",
       render: pageExamples
     },
     {
