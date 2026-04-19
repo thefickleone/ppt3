@@ -57,6 +57,7 @@
     currentChargeShift: 0,
     rodBaseX: 140,
     motionPhase: 0,
+    stepTimer: 0,
     simulationTravel: 0,
     eddyPosition: 560,
     eddyPulse: 0,
@@ -413,6 +414,9 @@
       if (state.page === 3) {
         state.motionPhase = 0;
       }
+      if (state.page === 4) {
+        state.stepTimer = 0;
+      }
       if (state.page === 6) {
         state.simulationTravel = 0;
       }
@@ -451,6 +455,13 @@
     scene.fluxArea.setAttribute("width", width.toFixed(2));
     scene.fluxArea.style.opacity = String(CONFIG.flux.baseOpacity + intensity * CONFIG.flux.opacityRange);
     scene.fluxArea.style.fillOpacity = String(CONFIG.flux.baseFillOpacity + intensity * CONFIG.flux.fillOpacityRange);
+  }
+
+  function setElectricFieldArrow(enabled) {
+    const marker = enabled ? "url(#arrowHead)" : "none";
+    Array.from(scene.electricField.children).forEach((line) => {
+      line.setAttribute("marker-end", marker);
+    });
   }
 
   function setTranslate(node, x, y, rotate = 0, scale = 1, depth = 0) {
@@ -564,13 +575,20 @@
     scene.capGlowPos.style.opacity = "0";
     scene.capGlowNeg.style.transform = "scale(1)";
     scene.capGlowPos.style.transform = "scale(1)";
+    Array.from(scene.electricField.children).forEach((line, idx) => {
+      const baseY = 278 + idx * 20;
+      line.setAttribute("y1", String(baseY));
+      line.setAttribute("y2", String(baseY));
+    });
     updateFluxArea(440, 0);
     state.rodBaseX = 140;
     state.motionPhase = 0;
+    state.stepTimer = 0;
     state.simulationTravel = 0;
     state.eddyPosition = 560;
     state.eddyPulse = 0;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
+    scene.rodGroup.firstChild.style.filter = "none";
     setTranslate(scene.generator, 0, 0, state.generatorSpin, 1, 0.8);
     setElectronShift(0);
     elements.title.classList.remove("intro-title");
@@ -611,24 +629,30 @@
   }
 
   function pageEMF() {
-    applyChargeSeparationPhase(1, true);
-    setFocus({ magnetic: 0.42, rod: 1, rodField: 1, emfCore: 1, flux: 1, electric: 1 });
-    updateFluxArea(state.rodBaseX, 1);
-    scene.capGlowNeg.style.opacity = "0.86";
-    scene.capGlowPos.style.opacity = "0.86";
-    scene.capGlowNeg.style.transform = "scale(1.2)";
-    scene.capGlowPos.style.transform = "scale(1.2)";
+    state.stepTimer = 0;
+    setFocus({ magnetic: 0.42, rod: 1, flux: 1, electric: 0.2, emfCore: 0.2 });
+    state.rodBaseX = 430;
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
+    setElectronShift(0);
+    updateFluxArea(state.rodBaseX, 0.08);
+    setElectricFieldArrow(false);
+    scene.negCap.style.opacity = "0.12";
+    scene.posCap.style.opacity = "0.12";
+    scene.capGlowNeg.style.opacity = "0";
+    scene.capGlowPos.style.opacity = "0";
     elements.presentation.dataset.emphasis = "emf";
   }
 
   function pageDerivation() {
     pageEMF();
+    setElectricFieldArrow(true);
     setFocus({ magnetic: 0.58, rod: 0.98, length: 1, velocity: 1, rodField: 1, emfCore: 1, flux: 1, electric: 1 });
     elements.presentation.dataset.emphasis = "equation";
   }
 
   function pageSimulation() {
     pageEMF();
+    setElectricFieldArrow(true);
     setFocus({ magnetic: 0.34, rod: 0.92, rodField: 0.8, emfCore: 0.78, flux: 1, electric: 0.85, circuit: 0.78, direction: 0.55 });
     setCircuitProgress(0.78);
     updateSimulationFromVelocity(0);
@@ -734,6 +758,51 @@
       scene.capGlowNeg.style.transform = `scale(${glowScale})`;
       scene.capGlowPos.style.transform = `scale(${glowScale})`;
       updateFluxArea(state.rodBaseX, motion);
+    }
+
+    if (state.page === 4) {
+      state.stepTimer += dt;
+      if (state.stepTimer > 5.6) {
+        state.stepTimer = 0;
+      }
+
+      const t = state.stepTimer;
+      const moveP = Math.max(0, Math.min(1, t / 1.8));
+      const separateP = Math.max(0, Math.min(1, (t - 1.0) / 1.7));
+      const emfP = Math.max(0, Math.min(1, (t - 2.1) / 1.8));
+
+      const moveEase = 0.5 - 0.5 * Math.cos(moveP * Math.PI);
+      const moveVelocity = moveP < 1 ? Math.sin(moveP * Math.PI) : 0;
+      state.rodBaseX = 430 + moveEase * 132;
+      setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
+
+      const separation = Math.max(separateP * 0.9, moveVelocity * 0.85);
+      setElectronShift(3 + separation * 32);
+      scene.negCap.style.opacity = String(0.14 + separation * 0.72);
+      scene.posCap.style.opacity = String(0.14 + separation * 0.72);
+
+      const pulse = 0.5 + 0.5 * Math.sin(t * 5.1);
+      const endGlow = emfP * (0.24 + pulse * 0.62);
+      const endScale = 0.9 + emfP * (0.18 + pulse * 0.12);
+      scene.capGlowNeg.style.opacity = String(endGlow);
+      scene.capGlowPos.style.opacity = String(endGlow);
+      scene.capGlowNeg.style.transform = `scale(${endScale})`;
+      scene.capGlowPos.style.transform = `scale(${endScale})`;
+
+      const rodEnergy = 0.18 + emfP * (0.28 + pulse * 0.28);
+      scene.rodGroup.firstChild.style.filter = `drop-shadow(0 0 ${8 + emfP * 10}px rgba(132, 236, 255, ${rodEnergy.toFixed(3)}))`;
+      scene.emfCore.style.opacity = String(0.2 + emfP * 0.8);
+      scene.emfCore.style.transform = `scale(${0.92 + emfP * (0.12 + pulse * 0.08)})`;
+
+      const waveAmp = 2 + emfP * 10;
+      Array.from(scene.electricField.children).forEach((line, idx) => {
+        const baseY = 278 + idx * 20;
+        const wave = Math.sin(t * 3.8 + idx * 0.85) * waveAmp;
+        line.setAttribute("y1", (baseY + wave).toFixed(2));
+        line.setAttribute("y2", (baseY - wave).toFixed(2));
+      });
+      scene.electricField.style.opacity = String(0.12 + emfP * 0.88);
+      updateFluxArea(state.rodBaseX, Math.max(separateP * 0.6, emfP));
     }
 
     if (state.page >= 3 && state.page <= 8 && state.currentChargeShift > 0) {
