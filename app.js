@@ -62,9 +62,20 @@
     return;
   }
 
-  const state = {
+  const uiState = {
     page: 0,
     transitionToken: 0,
+    isTransitioning: false,
+    inputCooldownUntil: 0,
+    parallaxTargetX: 0,
+    parallaxTargetY: 0,
+    parallaxX: 0,
+    parallaxY: 0,
+    lastTs: 0,
+    reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  };
+
+  const physicsState = {
     currentOffset: 0,
     currentSpeed: 0,
     currentSpeedTarget: 0,
@@ -75,16 +86,27 @@
     motionPhase: 0,
     stepTimer: 0,
     simulationTravel: 0,
-    energyPhase: 0,
-    isTransitioning: false,
-    inputCooldownUntil: 0,
-    parallaxTargetX: 0,
-    parallaxTargetY: 0,
-    parallaxX: 0,
-    parallaxY: 0,
-    lastTs: 0,
-    reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    energyPhase: 0
   };
+
+  // Bridge legacy access patterns while keeping physics/UI data separated.
+  const state = new Proxy({}, {
+    get(_target, prop) {
+      if (Object.prototype.hasOwnProperty.call(uiState, prop)) return uiState[prop];
+      return physicsState[prop];
+    },
+    set(_target, prop, value) {
+      if (Object.prototype.hasOwnProperty.call(uiState, prop)) {
+        uiState[prop] = value;
+        return true;
+      }
+      if (Object.prototype.hasOwnProperty.call(physicsState, prop)) {
+        physicsState[prop] = value;
+        return true;
+      }
+      return false;
+    }
+  });
 
   const controlsAbortController = new AbortController();
   const controlsSignal = controlsAbortController.signal;
