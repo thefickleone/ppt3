@@ -96,6 +96,10 @@
     lenzPhase: 0,
     energyPhase: 0,
     overlayTimer: null,
+    lineStartedAt: 0,
+    nextAdvanceAt: 0,
+    animationDelayMs: 220,
+    animationDurationMs: 980,
     lastTs: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
   };
@@ -271,10 +275,31 @@
     }, state.reducedMotion ? 0 : 170);
   }
 
+  function getLineTiming(step, lineIndex) {
+    const key = `${step}:${lineIndex}`;
+    const map = {
+      "2:2": { minAdvanceMs: 900, animationDelayMs: 260, animationDurationMs: 1100 },
+      "3:1": { minAdvanceMs: 820, animationDelayMs: 220, animationDurationMs: 980 },
+      "4:1": { minAdvanceMs: 850, animationDelayMs: 260, animationDurationMs: 1080 }
+    };
+    return map[key] || { minAdvanceMs: 620, animationDelayMs: 220, animationDurationMs: 940 };
+  }
+
+  function getWithinLineMotion() {
+    if (state.reducedMotion) return 1;
+    const elapsed = performance.now() - state.lineStartedAt;
+    const active = Math.max(0, elapsed - state.animationDelayMs);
+    const t = Math.min(1, active / state.animationDurationMs);
+    // Smooth ramp so visuals follow speech naturally.
+    return t * t * (3 - 2 * t);
+  }
+
   function getLineProgress() {
     const lineCount = steps[state.step].lines.length;
     if (lineCount <= 1) return 1;
-    return state.lineIndex / (lineCount - 1);
+    const base = state.lineIndex / (lineCount - 1);
+    const span = 1 / (lineCount - 1);
+    return Math.min(1, base + span * getWithinLineMotion());
   }
 
   function updateProgressUI() {
@@ -306,6 +331,11 @@
       if (token !== state.transitionToken) return;
       state.step = clamped;
       state.lineIndex = nextLine;
+      const timing = getLineTiming(state.step, state.lineIndex);
+      state.lineStartedAt = performance.now();
+      state.nextAdvanceAt = state.lineStartedAt + (state.reducedMotion ? 0 : timing.minAdvanceMs);
+      state.animationDelayMs = timing.animationDelayMs;
+      state.animationDurationMs = timing.animationDurationMs;
       updateProgressUI();
       elements.presentation.dataset.step = String(state.step);
       renderStep();
@@ -314,6 +344,9 @@
   }
 
   function advanceScript() {
+    if (!state.reducedMotion && performance.now() < state.nextAdvanceAt) {
+      return;
+    }
     const lines = steps[state.step].lines;
     if (state.lineIndex < lines.length - 1) {
       setStep(state.step, false, state.lineIndex + 1);
@@ -448,6 +481,12 @@
     if (state.step === 4) lenz(progress);
     if (state.step === 5) energyConversion(progress);
     if (state.step === 6) applications(progress);
+
+    const emphasis =
+      state.step === 2 ? "equation" :
+      state.step === 3 ? "current" :
+      state.step === 4 ? "lenz" : "none";
+    elements.presentation.dataset.emphasis = emphasis;
   }
 
   function animateFrame(ts) {
