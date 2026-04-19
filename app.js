@@ -183,6 +183,22 @@
     }
     rodGroup.append(electrons);
 
+    const rodField = makeAnim(svgEl("g", { id: "rodField" }), 0);
+    for (let i = 0; i < 4; i += 1) {
+      const x = 62 + i * 62;
+      rodField.append(
+        svgEl("line", { x1: String(x), y1: "12", x2: String(x + 36), y2: "12", class: "rod-field-arrow", "marker-end": "url(#arrowHead)" })
+      );
+    }
+    rodGroup.append(rodField);
+
+    const emfCore = makeAnim(svgEl("g", { id: "emfCore" }), 0);
+    emfCore.append(
+      svgEl("circle", { cx: "160", cy: "12", r: "7", class: "emf-core" }),
+      svgEl("circle", { cx: "160", cy: "12", r: "13", class: "emf-ring" })
+    );
+    rodGroup.append(emfCore);
+
     const electricField = makeAnim(svgEl("g", { id: "electricField" }), 0);
     for (let i = 0; i < 5; i += 1) {
       const y = 278 + i * 20;
@@ -253,6 +269,8 @@
       negCap,
       posCap,
       electronNodes,
+      rodField,
+      emfCore,
       electricField,
       circuitPath,
       currentParticles,
@@ -374,6 +392,8 @@
   function setFocus(levels) {
     reveal(scene.magneticField, levels.magnetic ?? 0.18, 0);
     reveal(scene.rodGroup, levels.rod ?? 0, 70);
+    reveal(scene.rodField, levels.rodField ?? 0, 150);
+    reveal(scene.emfCore, levels.emfCore ?? 0, 220);
     reveal(scene.electricField, levels.electric ?? 0, 120);
     reveal(scene.circuitPath, levels.circuit ?? 0, 140);
     reveal(scene.currentParticles, levels.current ?? 0, 220);
@@ -385,7 +405,7 @@
   }
 
   function resetVisuals() {
-    setFocus({ magnetic: 0.2, rod: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, generator: 0, skyline: 0 });
+    setFocus({ magnetic: 0.2, rod: 0, rodField: 0, emfCore: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, generator: 0, skyline: 0 });
     scene.circuitPath.classList.remove("drawn");
     scene.circuitPath.style.strokeDashoffset = "1300";
     scene.skyline.classList.remove("lights-on");
@@ -429,7 +449,10 @@
 
   function pageEMF() {
     applyChargeSeparationPhase(1, true);
-    setFocus({ magnetic: 0.42, rod: 1, electric: 1 });
+    setFocus({ magnetic: 0.42, rod: 1, rodField: 1, emfCore: 1, electric: 1 });
+    scene.negCap.style.filter = "drop-shadow(0 0 16px rgba(89,243,255,0.92))";
+    scene.posCap.style.filter = "drop-shadow(0 0 16px rgba(255,95,109,0.92))";
+    elements.presentation.dataset.emphasis = "emf";
   }
 
   function pageDerivation() {
