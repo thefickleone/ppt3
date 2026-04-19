@@ -597,8 +597,17 @@
 
   function pageMotion() {
     setFocus({ magnetic: 0.46, rod: 1, flux: 1 });
-    applyChargeSeparationPhase(state.motionPhase, true);
-    updateFluxArea(state.rodBaseX, state.motionPhase);
+    const motion = 0.5 + 0.5 * state.motionPhase;
+    const velocity = Math.sqrt(Math.max(0, 1 - state.motionPhase * state.motionPhase));
+    applyChargeSeparationPhase(motion, true);
+    setElectronShift(4 + velocity * 30);
+    const glow = 0.22 + velocity * 0.62;
+    const glowScale = 0.9 + velocity * 0.34;
+    scene.capGlowNeg.style.opacity = String(glow);
+    scene.capGlowPos.style.opacity = String(glow);
+    scene.capGlowNeg.style.transform = `scale(${glowScale})`;
+    scene.capGlowPos.style.transform = `scale(${glowScale})`;
+    updateFluxArea(state.rodBaseX, motion);
   }
 
   function pageEMF() {
@@ -710,12 +719,21 @@
     }
 
     if (state.page === 3) {
-      if (state.reducedMotion) {
-        state.motionPhase = 1;
-      } else {
-        state.motionPhase += (1 - state.motionPhase) * Math.min(1, dt * 1.45);
-      }
-      applyChargeSeparationPhase(state.motionPhase);
+      const time = ts * 0.001;
+      const speed = state.reducedMotion ? 1.4 : 2.2;
+      state.motionPhase = Math.sin(time * speed);
+
+      const motion = 0.5 + 0.5 * state.motionPhase;
+      const velocity = Math.abs(Math.cos(time * speed));
+      applyChargeSeparationPhase(motion);
+      setElectronShift(4 + velocity * 30);
+      const glow = 0.22 + velocity * 0.62;
+      const glowScale = 0.9 + velocity * 0.34;
+      scene.capGlowNeg.style.opacity = String(glow);
+      scene.capGlowPos.style.opacity = String(glow);
+      scene.capGlowNeg.style.transform = `scale(${glowScale})`;
+      scene.capGlowPos.style.transform = `scale(${glowScale})`;
+      updateFluxArea(state.rodBaseX, motion);
     }
 
     if (state.page >= 3 && state.page <= 8 && state.currentChargeShift > 0) {
