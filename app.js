@@ -30,6 +30,8 @@
     currentSpeed: 0,
     currentSpeedTarget: 0,
     generatorSpin: 0,
+    electronNoiseT: 0,
+    currentChargeShift: 0,
     rodBaseX: 140,
     motionPhase: 0,
     simulationVelocity: 0.55,
@@ -195,15 +197,24 @@
 
     const electrons = makeAnim(svgEl("g", { id: "electrons" }), 0);
     const electronNodes = [];
+    const electronMeta = [];
     for (let i = 0; i < 10; i += 1) {
+      const baseX = 18 + i * 29;
+      const baseY = 10 + (i % 2 === 0 ? 5 : 15);
       const electron = svgEl("circle", {
-        cx: String(18 + i * 29),
-        cy: String(10 + (i % 2 === 0 ? 5 : 15)),
+        cx: String(baseX),
+        cy: String(baseY),
         r: "3.8",
         class: "electron"
       });
       electrons.append(electron);
       electronNodes.push(electron);
+      electronMeta.push({
+        baseX,
+        baseY,
+        noise: 0.55 + ((i * 37) % 10) / 20,
+        phase: i * 0.62
+      });
     }
     rodGroup.append(electrons);
 
@@ -357,6 +368,7 @@
       negCap,
       posCap,
       electronNodes,
+      electronMeta,
       rodLengthMarker,
       velocityArrow,
       rodField,
@@ -516,9 +528,20 @@
   }
 
   function setElectronShift(shift) {
+    state.currentChargeShift = shift;
+    const p = Math.max(0, Math.min(1, shift / 36));
+    const eased = 1 - Math.pow(1 - p, 3);
+    const effectiveShift = 36 * eased;
+
     scene.electronNodes.forEach((node, idx) => {
+      const meta = scene.electronMeta[idx];
       const bias = (idx % 3) * 0.35;
-      node.style.transform = `translate(${-shift - bias * 6}px, 0px)`;
+      const noiseScale = state.reducedMotion ? 0 : meta.noise;
+      const collision = state.reducedMotion ? 0 : Math.sin(state.electronNoiseT * 2.6 + idx * 0.9) * (0.45 + p * 0.9);
+      const jitterX = Math.sin(state.electronNoiseT * 1.7 + meta.phase) * noiseScale * 1.35;
+      const jitterY = Math.cos(state.electronNoiseT * 1.25 + meta.phase * 1.2) * noiseScale * 0.8;
+      const x = -effectiveShift - bias * 6 + jitterX + collision;
+      node.style.transform = `translate(${x.toFixed(2)}px, ${jitterY.toFixed(2)}px)`;
     });
   }
 
@@ -687,6 +710,7 @@
     state.lastTs = ts;
 
     state.currentSpeed += (state.currentSpeedTarget - state.currentSpeed) * Math.min(1, dt * 5.5);
+    state.electronNoiseT += dt;
 
     if (state.page === 6) {
       updateSimulationFromVelocity(dt);
@@ -720,6 +744,10 @@
         state.motionPhase += (1 - state.motionPhase) * Math.min(1, dt * 1.45);
       }
       applyChargeSeparationPhase(state.motionPhase);
+    }
+
+    if (state.page >= 3 && state.page <= 8 && state.currentChargeShift > 0) {
+      setElectronShift(state.currentChargeShift);
     }
 
     if (state.page >= 9) {
