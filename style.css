@@ -366,7 +366,7 @@ body {
   height: 12px;
   border-radius: 999px;
   background: rgba(198, 247, 255, 0.94);
-  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.8));
+  box-shadow: 0 0 8px rgba(89, 243, 255, 0.45);
 }
 
 .app-card .bar {
@@ -589,7 +589,7 @@ body {
 }
 
 #sceneSvg {
-  --line-glow: drop-shadow(0 0 8px rgba(89, 243, 255, 0.42));
+  --line-glow: none;
 }
 
 #sceneSvg .anim {
@@ -613,12 +613,24 @@ body {
   fill: url(#rodGradient);
   stroke: rgba(255, 255, 255, 0.35);
   stroke-width: 1;
-  filter: var(--line-glow);
+}
+
+.rod-cap-glow {
+  opacity: 0;
+  transition: opacity 380ms ease-out;
+  transform-origin: center;
+}
+
+.cap-glow-negative {
+  fill: url(#glowCyan);
+}
+
+.cap-glow-positive {
+  fill: url(#glowRed);
 }
 
 .rod-cap {
-  transition: opacity 700ms ease, filter 520ms ease-in-out;
-  filter: var(--line-glow);
+  transition: opacity 700ms ease;
 }
 
 .cap-negative {
@@ -631,19 +643,19 @@ body {
 
 .electron {
   fill: #9ef8ff;
-  filter: drop-shadow(0 0 4px rgba(89, 243, 255, 0.8));
+  stroke: rgba(189, 245, 255, 0.62);
+  stroke-width: 0.8;
 }
 
 .rod-field-arrow {
   stroke: rgba(123, 241, 255, 0.96);
   stroke-width: 1.9;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(89, 243, 255, 0.62));
+  opacity: 0.96;
 }
 
 .emf-core {
-  fill: rgba(196, 248, 255, 0.95);
-  filter: drop-shadow(0 0 9px rgba(89, 243, 255, 0.88));
+  fill: url(#glowCyan);
 }
 
 .emf-ring {
@@ -651,24 +663,22 @@ body {
   stroke: rgba(124, 233, 255, 0.86);
   stroke-width: 1.6;
   transform-origin: center;
-  filter: drop-shadow(0 0 6px rgba(89, 243, 255, 0.58));
+  opacity: 0.82;
 }
 
 #presentation[data-page="3"] .electron {
   fill: #c7fdff;
-  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.95));
+  stroke: rgba(214, 252, 255, 0.78);
 }
 
 #presentation[data-page="3"] .rod {
   stroke: rgba(242, 250, 255, 0.55);
-  filter: drop-shadow(0 0 10px rgba(89, 243, 255, 0.3));
 }
 
 .ef-arrow {
   stroke: #6af2ff;
   stroke-width: 2;
   opacity: 0.8;
-  filter: drop-shadow(0 0 5px rgba(89, 243, 255, 0.36));
 }
 
 #presentation[data-emphasis="equation"] .ef-arrow {
@@ -719,7 +729,8 @@ body {
 
 .current-dot {
   fill: #9af7ff;
-  filter: drop-shadow(0 0 7px rgba(89, 243, 255, 0.75));
+  stroke: rgba(206, 250, 255, 0.65);
+  stroke-width: 0.8;
 }
 
 #presentation[data-emphasis="current"] .current-dot {
@@ -728,14 +739,14 @@ body {
 
 #presentation[data-emphasis="current"] .circuit {
   stroke: rgba(144, 212, 255, 0.95);
-  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.45));
+  stroke-width: 7.4;
 }
 
 .direction-arrow {
   stroke: rgba(170, 235, 255, 0.98);
   stroke-width: 3.6;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.78));
+  opacity: 0.98;
 }
 
 #presentation[data-page="7"] #title,
@@ -752,30 +763,27 @@ body {
   stroke: rgba(255, 196, 132, 0.95);
   stroke-width: 2.1;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 5px rgba(255, 166, 95, 0.55));
 }
 
 .velocity-arrow {
   stroke: rgba(176, 214, 255, 0.95);
   stroke-width: 2.6;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(168, 215, 255, 0.62));
 }
 
 .lenz-arrow {
   stroke: #8ad8ff;
   stroke-width: 5;
-  filter: drop-shadow(0 0 6px rgba(89, 243, 255, 0.42));
+  opacity: 0.94;
 }
 
 #presentation[data-page="8"] .lenz-arrow {
   stroke: rgba(131, 224, 255, 1);
   stroke-width: 5.8;
-  filter: drop-shadow(0 0 10px rgba(89, 243, 255, 0.75));
 }
 
 #presentation[data-page="8"] .rod {
-  filter: drop-shadow(0 0 12px rgba(255, 140, 140, 0.24));
+  stroke: rgba(255, 196, 196, 0.62);
 }
 
 #presentation[data-emphasis="lenz"] .lenz-arrow {
@@ -787,14 +795,14 @@ body {
   stroke: rgba(255, 157, 107, 0.95);
   stroke-width: 4;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 7px rgba(255, 157, 107, 0.55));
+  opacity: 0.95;
 }
 
 .elec-arrow {
   stroke: rgba(89, 243, 255, 0.95);
   stroke-width: 4;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.72));
+  opacity: 0.95;
 }
 
 .energy-link {
@@ -816,8 +824,7 @@ body {
 }
 
 .transform-core {
-  fill: rgba(229, 247, 255, 0.95);
-  filter: drop-shadow(0 0 10px rgba(89, 243, 255, 0.8));
+  fill: url(#glowCyan);
 }
 
 .transform-ring {
@@ -834,7 +841,7 @@ body {
   stroke-dasharray: 7 6;
   transform-origin: center;
   animation: eddySpin 1400ms linear infinite;
-  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.55));
+  opacity: 0.92;
 }
 
 .eddy-core {
@@ -851,7 +858,7 @@ body {
 }
 
 #presentation[data-page="11"] .rod {
-  filter: drop-shadow(0 0 10px rgba(89, 243, 255, 0.28));
+  stroke: rgba(184, 236, 255, 0.58);
 }
 
 #presentation[data-page="9"] .bg-gradient {
@@ -881,7 +888,7 @@ body {
   fill: rgba(89, 243, 255, 0.12);
   stroke: rgba(148, 222, 255, 0.95);
   stroke-width: 5;
-  filter: drop-shadow(0 0 12px rgba(89, 243, 255, 0.65));
+  opacity: 0.95;
 }
 
 .generator-axis {
@@ -974,11 +981,9 @@ body {
   0%,
   100% {
     opacity: 0.72;
-    filter: drop-shadow(0 0 6px rgba(89, 243, 255, 0.52));
   }
   50% {
     opacity: 1;
-    filter: drop-shadow(0 0 12px rgba(89, 243, 255, 0.88));
   }
 }
 

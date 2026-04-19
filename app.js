@@ -162,7 +162,19 @@
       svgEl("stop", { offset: "100%", "stop-color": "#6ea7ff" })
     );
 
-    defs.append(glow, arrowMarker, rodGradient);
+    const glowCyan = svgEl("radialGradient", { id: "glowCyan" });
+    glowCyan.append(
+      svgEl("stop", { offset: "0%", "stop-color": "rgba(89,243,255,0.95)" }),
+      svgEl("stop", { offset: "100%", "stop-color": "rgba(89,243,255,0)" })
+    );
+
+    const glowRed = svgEl("radialGradient", { id: "glowRed" });
+    glowRed.append(
+      svgEl("stop", { offset: "0%", "stop-color": "rgba(255,95,109,0.95)" }),
+      svgEl("stop", { offset: "100%", "stop-color": "rgba(255,95,109,0)" })
+    );
+
+    defs.append(glow, arrowMarker, rodGradient, glowCyan, glowRed);
     svg.append(defs);
 
     const magneticField = makeAnim(svgEl("g", { id: "magneticField" }), 0.2);
@@ -175,9 +187,11 @@
 
     const rodGroup = makeAnim(svgEl("g", { id: "rodGroup" }), 0);
     rodGroup.append(svgEl("rect", { x: "0", y: "0", width: "320", height: "24", rx: "12", class: "rod" }));
+    const capGlowNeg = svgEl("circle", { cx: "12", cy: "12", r: "30", class: "rod-cap-glow cap-glow-negative" });
+    const capGlowPos = svgEl("circle", { cx: "308", cy: "12", r: "30", class: "rod-cap-glow cap-glow-positive" });
     const negCap = svgEl("circle", { cx: "12", cy: "12", r: "14", class: "rod-cap cap-negative" });
     const posCap = svgEl("circle", { cx: "308", cy: "12", r: "14", class: "rod-cap cap-positive" });
-    rodGroup.append(negCap, posCap);
+    rodGroup.append(capGlowNeg, capGlowPos, negCap, posCap);
 
     const electrons = makeAnim(svgEl("g", { id: "electrons" }), 0);
     const electronNodes = [];
@@ -319,6 +333,8 @@
     return {
       magneticField,
       rodGroup,
+      capGlowNeg,
+      capGlowPos,
       negCap,
       posCap,
       electronNodes,
@@ -437,10 +453,12 @@
       scene.posCap.style.opacity = String(capOpacity);
     }
 
-    const glowSize = 4 + p * 14;
-    const glowAlpha = 0.34 + p * 0.56;
-    scene.negCap.style.filter = `drop-shadow(0 0 ${glowSize}px rgba(89,243,255,${glowAlpha}))`;
-    scene.posCap.style.filter = `drop-shadow(0 0 ${glowSize}px rgba(255,95,109,${glowAlpha}))`;
+    const glowAlpha = 0.18 + p * 0.55;
+    const glowScale = 0.85 + p * 0.35;
+    scene.capGlowNeg.style.opacity = String(glowAlpha);
+    scene.capGlowPos.style.opacity = String(glowAlpha);
+    scene.capGlowNeg.style.transform = `scale(${glowScale})`;
+    scene.capGlowPos.style.transform = `scale(${glowScale})`;
   }
 
   function updateSimulationUI() {
@@ -461,10 +479,10 @@
     setElectronShift(6 + separation * 30);
     scene.negCap.style.opacity = String(0.32 + separation * 0.68);
     scene.posCap.style.opacity = String(0.32 + separation * 0.68);
-
-    const glow = 7 + separation * 14;
-    scene.negCap.style.filter = `drop-shadow(0 0 ${glow}px rgba(89,243,255,${0.42 + separation * 0.5}))`;
-    scene.posCap.style.filter = `drop-shadow(0 0 ${glow}px rgba(255,95,109,${0.42 + separation * 0.5}))`;
+    scene.capGlowNeg.style.opacity = String(0.22 + separation * 0.62);
+    scene.capGlowPos.style.opacity = String(0.22 + separation * 0.62);
+    scene.capGlowNeg.style.transform = `scale(${0.9 + separation * 0.34})`;
+    scene.capGlowPos.style.transform = `scale(${0.9 + separation * 0.34})`;
 
     scene.electricField.style.opacity = String(0.35 + v * 0.65);
     scene.rodField.style.opacity = String(0.3 + v * 0.7);
@@ -510,8 +528,10 @@
     scene.lenzGroup.style.transform = "translate(0px, 0px) scale(1)";
     reveal(scene.negCap, 0, 120);
     reveal(scene.posCap, 0, 180);
-    scene.negCap.style.filter = "";
-    scene.posCap.style.filter = "";
+    scene.capGlowNeg.style.opacity = "0";
+    scene.capGlowPos.style.opacity = "0";
+    scene.capGlowNeg.style.transform = "scale(1)";
+    scene.capGlowPos.style.transform = "scale(1)";
     state.rodBaseX = 140;
     state.motionPhase = 0;
     state.simulationTravel = 0;
@@ -552,8 +572,10 @@
   function pageEMF() {
     applyChargeSeparationPhase(1, true);
     setFocus({ magnetic: 0.42, rod: 1, rodField: 1, emfCore: 1, electric: 1 });
-    scene.negCap.style.filter = "drop-shadow(0 0 16px rgba(89,243,255,0.92))";
-    scene.posCap.style.filter = "drop-shadow(0 0 16px rgba(255,95,109,0.92))";
+    scene.capGlowNeg.style.opacity = "0.86";
+    scene.capGlowPos.style.opacity = "0.86";
+    scene.capGlowNeg.style.transform = "scale(1.2)";
+    scene.capGlowPos.style.transform = "scale(1.2)";
     elements.presentation.dataset.emphasis = "emf";
   }
 
