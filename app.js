@@ -382,16 +382,15 @@
   function setOverlay() {
     const copy = pages[state.page];
     elements.presentation.classList.add("overlay-out");
-    if (state.overlayTimer) {
-      window.clearTimeout(state.overlayTimer);
-    }
-    state.overlayTimer = window.setTimeout(() => {
+    const token = state.transitionToken;
+    window.requestAnimationFrame(() => {
+      if (token !== state.transitionToken) return;
       elements.title.textContent = copy.title;
       elements.subtitle.textContent = copy.subtitle;
       elements.explanation.textContent = copy.explanation;
       elements.presentation.dataset.layout = copy.layout || "center";
       elements.presentation.classList.remove("overlay-out");
-    }, state.reducedMotion ? 0 : CONFIG.timing.overlayFadeMs);
+    });
   }
 
   function updateProgressUI() {
@@ -402,47 +401,36 @@
     const clamped = Math.max(0, Math.min(MAX_PAGE, nextPage));
     if (clamped === state.page && !instant && !state.isTransitioning) return;
 
-    if (state.transitionTimer) {
-      window.clearTimeout(state.transitionTimer);
-      state.transitionTimer = null;
-    }
-
     const token = ++state.transitionToken;
     state.isTransitioning = true;
     scene.skyline.classList.remove("lights-on");
     scene.circuitPath.classList.remove("drawn");
     elements.presentation.classList.add("scene-transitioning");
 
-    // Transition-out phase keeps continuity but reduces visual clutter.
     if (!instant) {
       scene.generator.style.opacity = state.page >= 9 ? "0.5" : scene.generator.style.opacity;
       scene.skyline.style.opacity = state.page >= 10 ? "0.35" : scene.skyline.style.opacity;
       state.currentSpeedTarget = 0;
     }
 
-    const delay = instant || state.reducedMotion ? 0 : CONFIG.timing.pageTransitionMs;
-    state.transitionTimer = window.setTimeout(() => {
-      if (token !== state.transitionToken) return;
-      state.page = clamped;
-      if (state.page === 3) {
-        state.motionPhase = 0;
-      }
-      if (state.page === 4) {
-        state.stepTimer = 0;
-      }
-      if (state.page === 6) {
-        state.simulationTravel = 0;
-      }
-      state.lastTs = 0;
-      const noSvgPages = [1, 5, 10, 11];
-      elements.scene.style.opacity = noSvgPages.includes(state.page) ? "0" : "1";
-      updateProgressUI();
-      elements.presentation.dataset.page = String(state.page);
-      renderPage();
-      elements.presentation.classList.remove("scene-transitioning");
-      state.isTransitioning = false;
-      state.transitionTimer = null;
-    }, delay);
+    state.page = clamped;
+    if (state.page === 3) {
+      state.motionPhase = 0;
+    }
+    if (state.page === 4) {
+      state.stepTimer = 0;
+    }
+    if (state.page === 6) {
+      state.simulationTravel = 0;
+    }
+    state.lastTs = 0;
+    const noSvgPages = [1, 5, 10, 11];
+    elements.scene.style.opacity = noSvgPages.includes(state.page) ? "0" : "1";
+    updateProgressUI();
+    elements.presentation.dataset.page = String(state.page);
+    renderPage();
+    elements.presentation.classList.remove("scene-transitioning");
+    state.isTransitioning = false;
   }
 
   function nextPage() {

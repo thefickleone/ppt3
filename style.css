@@ -23,6 +23,8 @@ body {
   background: var(--bg-main);
   color: var(--text-primary);
   font-family: "Inter", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #presentation {
@@ -33,6 +35,7 @@ body {
   isolation: isolate;
   display: grid;
   place-items: center;
+  touch-action: none;
 }
 
 .presentation-canvas {
