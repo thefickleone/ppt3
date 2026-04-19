@@ -578,14 +578,8 @@
   }
 
   function pageIntro() {
-    setFocus({ magnetic: 0.14, rod: 0.9, rodField: 0, emfCore: 0, electric: 0, circuit: 0.12, current: 0.12, direction: 0, lenz: 0, energy: 1, converter: 1, generator: 0.88, skyline: 0.08 });
-    // Morph the existing rod into the converter core so the world evolves continuously.
-    state.rodBaseX = 560;
-    setTranslate(scene.rodGroup, state.rodBaseX, 198, 0, 0.34, 1.05);
-    setElectronShift(0);
-    scene.negCap.style.opacity = "0.65";
-    scene.posCap.style.opacity = "0.65";
-    elements.subtitle.classList.add("intro-subtitle");
+    setFocus({ magnetic: 0 });
+    elements.subtitle.classList.remove("intro-subtitle");
   }
 
   function pageExamples() {
