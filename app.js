@@ -7,6 +7,8 @@
   const elements = {
     presentation: document.getElementById("presentation"),
     svg: document.getElementById("sceneSvg"),
+    bgGrid: document.querySelector("#background .bg-grid"),
+    bgGradient: document.querySelector("#background .bg-gradient"),
     title: document.getElementById("title"),
     subtitle: document.getElementById("subtitle"),
     stepValue: document.getElementById("stepValue"),
@@ -22,6 +24,7 @@
 
   if (
     !elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
+    !elements.bgGrid || !elements.bgGradient ||
     !elements.velocitySlider || !elements.velocityValue ||
     !elements.velocityControl || !elements.velocityActive || !elements.velocityThumb || !elements.velocityThumbGlow ||
     elements.applicationCards.length === 0
@@ -51,6 +54,10 @@
     overlayTimer: null,
     inputCooldownUntil: 0,
     sliderDragging: false,
+    parallaxTargetX: 0,
+    parallaxTargetY: 0,
+    parallaxX: 0,
+    parallaxY: 0,
     lastTs: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
   };
@@ -496,8 +503,10 @@
     return Math.max(0, Math.min(rodRight, fieldRight) - Math.max(rodLeft, fieldLeft));
   }
 
-  function setTranslate(node, x, y, rotate = 0, scale = 1) {
-    node.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`;
+  function setTranslate(node, x, y, rotate = 0, scale = 1, depth = 0) {
+    const px = state.parallaxX * depth;
+    const py = state.parallaxY * depth;
+    node.style.transform = `translate(${(x + px).toFixed(2)}px, ${(y + py).toFixed(2)}px) rotate(${rotate}deg) scale(${scale})`;
   }
 
   function applyChargeSeparationPhase(phase, useRevealDelay = false) {
@@ -637,8 +646,8 @@
     state.eddyVelocity = 0;
     state.eddyPulse = 0;
     state.eddyPrevOverlap = 0;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
-    setTranslate(scene.generator, 0, 0, state.generatorSpin);
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
+    setTranslate(scene.generator, 0, 0, state.generatorSpin, 1, 0.8);
     setElectronShift(0);
     elements.title.classList.remove("intro-title");
     elements.subtitle.classList.remove("intro-subtitle");
@@ -648,7 +657,7 @@
     setFocus({ magnetic: 0.14, rod: 0.9, rodField: 0, emfCore: 0, electric: 0, circuit: 0.12, current: 0.12, direction: 0, lenz: 0, energy: 1, converter: 1, generator: 0.88, skyline: 0.08 });
     // Morph the existing rod into the converter core so the world evolves continuously.
     state.rodBaseX = 560;
-    setTranslate(scene.rodGroup, state.rodBaseX, 198, 0, 0.34);
+    setTranslate(scene.rodGroup, state.rodBaseX, 198, 0, 0.34, 1.05);
     setElectronShift(0);
     scene.negCap.style.opacity = "0.65";
     scene.posCap.style.opacity = "0.65";
@@ -665,7 +674,7 @@
   function pageRodQuestion() {
     setFocus({ magnetic: 0.32, rod: 1 });
     state.rodBaseX = 440;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
     reveal(scene.negCap, 0.35, 160);
     reveal(scene.posCap, 0.35, 210);
     setElectronShift(0);
@@ -713,7 +722,7 @@
     pageCurrent();
     setFocus({ magnetic: 0.42, rod: 0.95, flux: 0.9, electric: 0.72, circuit: 1, current: 1, direction: 1, lenz: 1 });
     state.rodBaseX = 388;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
     state.currentSpeedTarget = 208;
     scene.lenzGroup.style.transform = "translate(0px, -2px) scale(1.08)";
     elements.presentation.dataset.emphasis = "lenz";
@@ -784,7 +793,7 @@
       scene.magneticField.style.opacity = String(0.36 + opposition * 0.2);
       scene.lenzGroup.style.transform = `translate(${-7 * opposition}px, -2px) scale(${1.06 + opposition * 0.05})`;
       // Keep rod stable to avoid glitch-like jitter; opposition is shown by field deformation.
-      setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+      setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
     }
 
     if (state.page === 3) {
@@ -802,7 +811,7 @@
 
     if (state.page >= 9) {
       state.generatorSpin += state.reducedMotion ? 0.3 : 2.3;
-      setTranslate(scene.generator, 0, 0, state.generatorSpin);
+      setTranslate(scene.generator, 0, 0, state.generatorSpin, 1, 0.8);
     }
 
     if (state.page >= 9) {
@@ -827,14 +836,36 @@
       if (state.eddyPosition > 780) {
         state.eddyPosition = 780;
       }
-      setTranslate(scene.rodGroup, state.eddyPosition, 320, 0);
+      setTranslate(scene.rodGroup, state.eddyPosition, 320, 0, 1, 1.05);
       const eddyVis = (overlap > 0 ? 0.22 : 0.08) + state.eddyPulse * 0.78;
       scene.eddyLoops.style.opacity = String(Math.min(1, eddyVis));
       scene.eddyLoops.style.transform = `translate(0px, 0px) scale(${0.94 + state.eddyPulse * 0.2})`;
     }
 
+    const ambientX = Math.sin(ts * 0.00023) * 5;
+    const ambientY = Math.cos(ts * 0.00019) * 4;
+    const targetX = state.parallaxTargetX + ambientX;
+    const targetY = state.parallaxTargetY + ambientY;
+    state.parallaxX += (targetX - state.parallaxX) * Math.min(1, dt * 2.6);
+    state.parallaxY += (targetY - state.parallaxY) * Math.min(1, dt * 2.6);
+
+    elements.bgGrid.style.transform = `translate(${(state.parallaxX * 0.35).toFixed(2)}px, ${(state.parallaxY * 0.35).toFixed(2)}px)`;
+    elements.bgGradient.style.transform = `translate(${(state.parallaxX * 0.18).toFixed(2)}px, ${(state.parallaxY * 0.18).toFixed(2)}px)`;
+
+    if (state.page !== 8) {
+      scene.magneticField.style.transform = `translate(${(state.parallaxX * 0.55).toFixed(2)}px, ${(state.parallaxY * 0.42).toFixed(2)}px) scale(1, 1)`;
+    }
+
     window.requestAnimationFrame(animateFrame);
   }
+
+  window.addEventListener("pointermove", (event) => {
+    const rect = elements.presentation.getBoundingClientRect();
+    const nx = (event.clientX - rect.left) / rect.width - 0.5;
+    const ny = (event.clientY - rect.top) / rect.height - 0.5;
+    state.parallaxTargetX = nx * 14;
+    state.parallaxTargetY = ny * 10;
+  });
 
   window.addEventListener("keydown", (event) => {
     if (event.repeat) return;
