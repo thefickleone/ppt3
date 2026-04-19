@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Motional EMF - Cinematic Presentation</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="presentation" aria-label="Motional EMF cinematic scene">
+      <div id="background" class="layer" aria-hidden="true">
+        <div class="bg-gradient"></div>
+        <div class="bg-grid"></div>
+      </div>
+
+      <section id="scene" class="layer" aria-label="Physics scene">
+        <svg
+          id="sceneSvg"
+          viewBox="0 0 1200 675"
+          preserveAspectRatio="xMidYMid slice"
+          role="img"
+          aria-label="Motional EMF visual scene canvas"
+        ></svg>
+      </section>
+
+      <header id="overlay" class="layer">
+        <h1 id="title">Motional EMF</h1>
+        <p id="subtitle">How does motion become electricity?</p>
+      </header>
+
+      <aside id="ui" class="layer" aria-label="Presentation controls and progress">
+        <div id="progress">
+          <span class="label">Step</span>
+          <span id="stepValue">0 / 5</span>
+        </div>
+        <div id="hint">Right Arrow / Space: Next &middot; Left Arrow: Previous &middot; R: Reload</div>
+      </aside>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
+
