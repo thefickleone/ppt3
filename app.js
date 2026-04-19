@@ -25,6 +25,7 @@
     currentSpeedTarget: 0,
     generatorSpin: 0,
     rodBaseX: 140,
+    motionPhase: 0,
     lenzPhase: 0,
     energyPhase: 0,
     overlayTimer: null,
@@ -305,6 +306,9 @@
     window.setTimeout(() => {
       if (token !== state.transitionToken) return;
       state.page = clamped;
+      if (state.page === 3) {
+        state.motionPhase = 0;
+      }
       updateProgressUI();
       elements.presentation.dataset.page = String(state.page);
       renderPage();
@@ -332,6 +336,27 @@
 
   function setTranslate(node, x, y, rotate = 0) {
     node.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
+  }
+
+  function applyChargeSeparationPhase(phase, useRevealDelay = false) {
+    const p = Math.max(0, Math.min(1, phase));
+    state.rodBaseX = 440 + p * 132;
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+    setElectronShift(2 + p * 34);
+
+    const capOpacity = 0.28 + p * 0.72;
+    if (useRevealDelay) {
+      reveal(scene.negCap, capOpacity, 180);
+      reveal(scene.posCap, capOpacity, 240);
+    } else {
+      scene.negCap.style.opacity = String(capOpacity);
+      scene.posCap.style.opacity = String(capOpacity);
+    }
+
+    const glowSize = 4 + p * 14;
+    const glowAlpha = 0.34 + p * 0.56;
+    scene.negCap.style.filter = `drop-shadow(0 0 ${glowSize}px rgba(89,243,255,${glowAlpha}))`;
+    scene.posCap.style.filter = `drop-shadow(0 0 ${glowSize}px rgba(255,95,109,${glowAlpha}))`;
   }
 
   function setElectronShift(shift) {
@@ -366,7 +391,10 @@
     scene.skyline.classList.remove("lights-on");
     reveal(scene.negCap, 0, 120);
     reveal(scene.posCap, 0, 180);
+    scene.negCap.style.filter = "";
+    scene.posCap.style.filter = "";
     state.rodBaseX = 140;
+    state.motionPhase = 0;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
     setTranslate(scene.generator, 0, 0, state.generatorSpin);
     setElectronShift(0);
@@ -396,15 +424,11 @@
 
   function pageMotion() {
     setFocus({ magnetic: 0.46, rod: 1 });
-    state.rodBaseX = 460;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
-    reveal(scene.negCap, 1, 200);
-    reveal(scene.posCap, 1, 260);
-    setElectronShift(34);
+    applyChargeSeparationPhase(state.motionPhase, true);
   }
 
   function pageEMF() {
-    pageMotion();
+    applyChargeSeparationPhase(1, true);
     setFocus({ magnetic: 0.42, rod: 1, electric: 1 });
   }
 
@@ -487,6 +511,15 @@
       state.lenzPhase += dt * 24;
       const resistance = Math.sin(state.lenzPhase) * (state.reducedMotion ? 0 : 2.4);
       setTranslate(scene.rodGroup, state.rodBaseX + resistance, 320, 0);
+    }
+
+    if (state.page === 3) {
+      if (state.reducedMotion) {
+        state.motionPhase = 1;
+      } else {
+        state.motionPhase += (1 - state.motionPhase) * Math.min(1, dt * 1.45);
+      }
+      applyChargeSeparationPhase(state.motionPhase);
     }
 
     if (state.page >= 9) {

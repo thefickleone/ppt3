@@ -382,7 +382,7 @@ body {
 }
 
 .rod-cap {
-  transition: opacity 700ms ease;
+  transition: opacity 700ms ease, filter 520ms ease-in-out;
   filter: var(--line-glow);
 }
 
@@ -398,6 +398,16 @@ body {
   fill: #9ef8ff;
   filter: drop-shadow(0 0 4px rgba(89, 243, 255, 0.8));
   transition: transform 980ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#presentation[data-page="3"] .electron {
+  fill: #c7fdff;
+  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.95));
+}
+
+#presentation[data-page="3"] .rod {
+  stroke: rgba(242, 250, 255, 0.55);
+  filter: drop-shadow(0 0 10px rgba(89, 243, 255, 0.3));
 }
 
 .ef-arrow {
