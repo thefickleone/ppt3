@@ -10,10 +10,15 @@
     title: document.getElementById("title"),
     subtitle: document.getElementById("subtitle"),
     stepValue: document.getElementById("stepValue"),
-    explanation: document.getElementById("explanation")
+    explanation: document.getElementById("explanation"),
+    velocitySlider: document.getElementById("velocitySlider"),
+    velocityValue: document.getElementById("velocityValue")
   };
 
-  if (!elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation) {
+  if (
+    !elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
+    !elements.velocitySlider || !elements.velocityValue
+  ) {
     return;
   }
 
@@ -26,6 +31,8 @@
     generatorSpin: 0,
     rodBaseX: 140,
     motionPhase: 0,
+    simulationVelocity: 0.55,
+    simulationTravel: 0,
     lenzPhase: 0,
     energyPhase: 0,
     overlayTimer: null,
@@ -76,7 +83,7 @@
     {
       title: "Simulation View",
       subtitle: "Full setup before current",
-      explanation: "Chapter 7: Assemble the scene with rod, field, and loop to preview the complete model.",
+      explanation: "Use the velocity slider: higher v increases rod speed, charge separation, and EMF intensity.",
       render: pageSimulation
     },
     {
@@ -350,6 +357,9 @@
       if (state.page === 3) {
         state.motionPhase = 0;
       }
+      if (state.page === 6) {
+        state.simulationTravel = 0;
+      }
       updateProgressUI();
       elements.presentation.dataset.page = String(state.page);
       renderPage();
@@ -400,6 +410,34 @@
     scene.posCap.style.filter = `drop-shadow(0 0 ${glowSize}px rgba(255,95,109,${glowAlpha}))`;
   }
 
+  function updateSimulationUI() {
+    elements.velocityValue.textContent = state.simulationVelocity.toFixed(2);
+  }
+
+  function updateSimulationFromVelocity(dt = 0) {
+    const v = state.simulationVelocity;
+    const separation = 0.28 + v * 0.72;
+
+    if (dt > 0) {
+      state.simulationTravel += dt * (0.9 + v * 3.5);
+    }
+    const sway = Math.sin(state.simulationTravel) * (6 + v * 26);
+    state.rodBaseX = 468 + sway;
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+
+    setElectronShift(6 + separation * 30);
+    scene.negCap.style.opacity = String(0.32 + separation * 0.68);
+    scene.posCap.style.opacity = String(0.32 + separation * 0.68);
+
+    const glow = 7 + separation * 14;
+    scene.negCap.style.filter = `drop-shadow(0 0 ${glow}px rgba(89,243,255,${0.42 + separation * 0.5}))`;
+    scene.posCap.style.filter = `drop-shadow(0 0 ${glow}px rgba(255,95,109,${0.42 + separation * 0.5}))`;
+
+    scene.electricField.style.opacity = String(0.35 + v * 0.65);
+    scene.rodField.style.opacity = String(0.3 + v * 0.7);
+    scene.emfCore.style.opacity = String(0.28 + v * 0.72);
+  }
+
   function setElectronShift(shift) {
     scene.electronNodes.forEach((node, idx) => {
       const bias = (idx % 3) * 0.35;
@@ -440,6 +478,7 @@
     scene.posCap.style.filter = "";
     state.rodBaseX = 140;
     state.motionPhase = 0;
+    state.simulationTravel = 0;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
     setTranslate(scene.generator, 0, 0, state.generatorSpin);
     setElectronShift(0);
@@ -488,8 +527,9 @@
 
   function pageSimulation() {
     pageEMF();
-    setFocus({ magnetic: 0.34, rod: 0.92, electric: 0.85, circuit: 0.78, direction: 0.55 });
+    setFocus({ magnetic: 0.34, rod: 0.92, rodField: 0.8, emfCore: 0.78, electric: 0.85, circuit: 0.78, direction: 0.55 });
     setCircuitProgress(0.78);
+    updateSimulationFromVelocity(0);
   }
 
   function pageCurrent() {
@@ -544,6 +584,11 @@
     state.lastTs = ts;
 
     state.currentSpeed += (state.currentSpeedTarget - state.currentSpeed) * Math.min(1, dt * 5.5);
+
+    if (state.page === 6) {
+      updateSimulationFromVelocity(dt);
+      state.currentSpeedTarget = 42 + state.simulationVelocity * 84;
+    }
 
     if (state.page >= 7) {
       state.currentOffset = (state.currentOffset + state.currentSpeed * dt) % scene.circuitLen;
@@ -606,6 +651,16 @@
       window.location.reload();
     }
   });
+
+  elements.velocitySlider.addEventListener("input", () => {
+    state.simulationVelocity = Number(elements.velocitySlider.value) / 100;
+    updateSimulationUI();
+    if (state.page === 6) {
+      updateSimulationFromVelocity(0);
+    }
+  });
+
+  updateSimulationUI();
 
   setPage(0, true);
   window.requestAnimationFrame(animateFrame);

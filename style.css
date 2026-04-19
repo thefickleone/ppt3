@@ -334,6 +334,40 @@ body {
   text-shadow: 0 0 16px rgba(89, 243, 255, 0.2);
 }
 
+#simulationControl {
+  align-self: center;
+  width: min(520px, 72vw);
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.58rem 0.74rem;
+  border: 1px solid rgba(113, 193, 255, 0.28);
+  border-radius: 12px;
+  background: rgba(4, 10, 24, 0.56);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 360ms ease, transform 360ms var(--ease-ui);
+  pointer-events: none;
+}
+
+#simulationControl label {
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: rgba(212, 232, 255, 0.92);
+}
+
+#simulationControl input[type="range"] {
+  width: 100%;
+  accent-color: #67f2ff;
+  cursor: pointer;
+}
+
+#presentation[data-page="6"] #simulationControl {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 #presentation[data-page="0"] #title,
 #presentation[data-page="0"] #subtitle {
   opacity: 1;
