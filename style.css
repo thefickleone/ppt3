@@ -249,14 +249,15 @@ body {
 
 #presentation[data-page="5"] #equationBuild .term,
 #presentation[data-page="5"] #equationBuild .operator {
-  animation: derivationTermIn 680ms ease-out forwards;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: none;
 }
 
-#presentation[data-page="5"] #equationBuild .term-epsilon { animation-delay: 100ms; }
-#presentation[data-page="5"] #equationBuild .operator { animation-delay: 280ms; }
-#presentation[data-page="5"] #equationBuild .term-b { animation-delay: 460ms; }
-#presentation[data-page="5"] #equationBuild .term-l { animation-delay: 660ms; }
-#presentation[data-page="5"] #equationBuild .term-v { animation-delay: 860ms; }
+#presentation[data-page="5"] #scene,
+#presentation[data-page="10"] #scene,
+#presentation[data-page="11"] #scene {
+  opacity: 0;
 
 #presentation[data-page="5"] #equationBuild .term-b,
 #presentation[data-page="5"] .legend-b {
@@ -896,7 +897,7 @@ body {
   fill: #d2fbff;
   stroke: rgba(198, 250, 255, 0.96);
   stroke-width: 1.2;
-  filter: drop-shadow(0 0 10px rgba(89, 243, 255, 0.78));
+  filter: drop-shadow(0 0 12px rgba(89, 243, 255, 0.84));
 }
 
 #presentation[data-emphasis="current"] .circuit {
@@ -994,8 +995,12 @@ body {
 }
 
 #presentation[data-emphasis="lenz"] .lenz-arrow {
-  animation: emphasisGlow 980ms ease-in-out infinite;
-  stroke: rgba(120, 214, 255, 1);
+  animation: none;
+  stroke: rgba(255, 143, 143, 1);
+}
+
+#presentation[data-emphasis="lenz"] .rod-glow {
+  fill: rgba(255, 95, 109, 0.35);
 }
 
 .mech-arrow {
@@ -1016,6 +1021,13 @@ body {
   stroke: rgba(210, 230, 255, 0.8);
   stroke-width: 3;
   stroke-linecap: round;
+}
+
+.energy-label {
+  fill: rgba(220, 236, 255, 0.9);
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  font-family: "SF Pro Display", "Segoe UI", sans-serif;
 }
 
 .mech-block {
@@ -1076,11 +1088,11 @@ body {
 }
 
 #presentation[data-page="9"] .transform-core {
-  animation: coreTransfer 1100ms ease-in-out infinite;
+  animation: none;
 }
 
 #presentation[data-page="9"] .transform-ring {
-  animation: ringTransfer 1200ms ease-in-out infinite;
+  animation: none;
 }
 
 #presentation[data-page="9"] .mech-arrow {

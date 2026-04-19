@@ -5,8 +5,6 @@
   const MAX_PAGE = 11;
   const CONFIG = {
     timing: {
-      overlayFadeMs: 170,
-      pageTransitionMs: 260,
       inputCooldownMs: 95,
       reloadCooldownMs: 120
     },
@@ -14,7 +12,6 @@
       dashTotal: 1300
     },
     flux: {
-      leftX: 440,
       maxWidth: 420,
       baseOpacity: 0.16,
       opacityRange: 0.74,
@@ -24,6 +21,20 @@
     simulation: {
       velocity: 0.55
     }
+  };
+
+  const GEOMETRY = {
+    rodStartX: 440,
+    rodTravelX: 132,
+    rodY: 320,
+    emfRodStartX: 430,
+    simulationRodCenterX: 468,
+    lenzRodX: 388,
+    fluxLeftX: 440,
+    electricFieldBaseY: 278,
+    electricFieldStepY: 20,
+    currentDotBaseR: 4,
+    currentDotActiveR: 7
   };
 
   const elements = {
@@ -64,13 +75,7 @@
     motionPhase: 0,
     stepTimer: 0,
     simulationTravel: 0,
-    eddyPosition: 560,
-    eddyPulse: 0,
-    lenzPhase: 0,
     energyPhase: 0,
-    applicationCycle: 0,
-    overlayTimer: null,
-    transitionTimer: null,
     isTransitioning: false,
     inputCooldownUntil: 0,
     parallaxTargetX: 0,
@@ -302,8 +307,12 @@
     energyFlow.append(
       svgEl("line", { x1: "320", y1: "220", x2: "500", y2: "220", class: "mech-arrow", "marker-end": "url(#arrowHead)" }),
       svgEl("line", { x1: "700", y1: "220", x2: "900", y2: "220", class: "elec-arrow", "marker-end": "url(#arrowHead)" }),
-      svgEl("line", { x1: "600", y1: "245", x2: "600", y2: "290", class: "energy-link", "marker-end": "url(#arrowHead)" })
+      svgEl("line", { x1: "600", y1: "245", x2: "600", y2: "290", class: "energy-link", "marker-end": "url(#arrowHead)" }),
+      svgEl("text", { x: "330", y: "205", class: "energy-label" }),
+      svgEl("text", { x: "706", y: "205", class: "energy-label" })
     );
+    energyFlow.children[3].textContent = "Mechanical";
+    energyFlow.children[4].textContent = "Electrical";
 
     const energyConverter = makeAnim(svgEl("g", { id: "energyConverter" }), 0);
     energyConverter.append(
@@ -401,7 +410,7 @@
     const clamped = Math.max(0, Math.min(MAX_PAGE, nextPage));
     if (clamped === state.page && !instant && !state.isTransitioning) return;
 
-    const token = ++state.transitionToken;
+    ++state.transitionToken;
     state.isTransitioning = true;
     scene.skyline.classList.remove("lights-on");
     scene.circuitPath.classList.remove("drawn");
@@ -453,7 +462,7 @@
   }
 
   function updateFluxArea(rodX, intensity) {
-    const width = Math.max(0, Math.min(CONFIG.flux.maxWidth, rodX - CONFIG.flux.leftX));
+    const width = Math.max(0, Math.min(CONFIG.flux.maxWidth, rodX - GEOMETRY.fluxLeftX));
     scene.fluxArea.setAttribute("width", width.toFixed(2));
     scene.fluxArea.style.opacity = String(CONFIG.flux.baseOpacity + intensity * CONFIG.flux.opacityRange);
     scene.fluxArea.style.fillOpacity = String(CONFIG.flux.baseFillOpacity + intensity * CONFIG.flux.fillOpacityRange);
@@ -482,8 +491,8 @@
 
   function applyChargeSeparationPhase(phase, useRevealDelay = false) {
     const p = Math.max(0, Math.min(1, phase));
-    state.rodBaseX = 440 + p * 132;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+    state.rodBaseX = GEOMETRY.rodStartX + p * GEOMETRY.rodTravelX;
+    setTranslate(scene.rodGroup, state.rodBaseX, GEOMETRY.rodY, 0);
     setElectronShift(2 + p * 34);
 
     const capOpacity = 0.28 + p * 0.72;
@@ -511,8 +520,8 @@
       state.simulationTravel += dt * (0.9 + v * 3.5);
     }
     const sway = Math.sin(state.simulationTravel) * (6 + v * 26);
-    state.rodBaseX = 468 + sway;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+    state.rodBaseX = GEOMETRY.simulationRodCenterX + sway;
+    setTranslate(scene.rodGroup, state.rodBaseX, GEOMETRY.rodY, 0);
 
     setElectronShift(6 + separation * 30);
     scene.negCap.style.opacity = String(0.32 + separation * 0.68);
@@ -587,26 +596,23 @@
     scene.capGlowPos.style.transform = "scale(1)";
     scene.rodGlow.style.opacity = "0";
     Array.from(scene.electricField.children).forEach((line, idx) => {
-      const baseY = 278 + idx * 20;
+      const baseY = GEOMETRY.electricFieldBaseY + idx * GEOMETRY.electricFieldStepY;
       line.setAttribute("y1", String(baseY));
       line.setAttribute("y2", String(baseY));
     });
-    updateFluxArea(440, 0);
+    updateFluxArea(GEOMETRY.fluxLeftX, 0);
     state.rodBaseX = 140;
     state.motionPhase = 0;
     state.stepTimer = 0;
     state.simulationTravel = 0;
-    state.eddyPosition = 560;
-    state.eddyPulse = 0;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
+    setTranslate(scene.rodGroup, state.rodBaseX, GEOMETRY.rodY, 0, 1, 1.05);
     scene.rodGlow.style.opacity = "0";
     setTranslate(scene.generator, 0, 0, state.generatorSpin, 1, 0.8);
     scene.particles.forEach((particle) => {
-      particle.setAttribute("r", "4");
+      particle.setAttribute("r", String(GEOMETRY.currentDotBaseR));
     });
     setElectronShift(0);
     setActiveApplicationCard(-1);
-    state.applicationCycle = 0;
     elements.title.classList.remove("intro-title");
     elements.subtitle.classList.remove("intro-subtitle");
   }
@@ -622,8 +628,8 @@
 
   function pageRodQuestion() {
     setFocus({ magnetic: 0.32, rod: 1 });
-    state.rodBaseX = 440;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
+    state.rodBaseX = GEOMETRY.rodStartX;
+    setTranslate(scene.rodGroup, state.rodBaseX, GEOMETRY.rodY, 0, 1, 1.05);
     scene.negCap.style.opacity = "0";
     scene.posCap.style.opacity = "0";
     setElectronShift(0);
@@ -647,8 +653,8 @@
   function pageEMF() {
     state.stepTimer = 0;
     setFocus({ magnetic: 0.42, rod: 1, flux: 1, electric: 0.2, emfCore: 0.2 });
-    state.rodBaseX = 430;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
+    state.rodBaseX = GEOMETRY.emfRodStartX;
+    setTranslate(scene.rodGroup, state.rodBaseX, GEOMETRY.rodY, 0, 1, 1.05);
     setElectronShift(0);
     updateFluxArea(state.rodBaseX, 0.08);
     setElectricFieldArrow(false);
@@ -678,47 +684,38 @@
     pageSimulation();
     setFocus({ magnetic: 0.32, rod: 0.9, flux: 0.92, electric: 0.74, circuit: 1, current: 1, direction: 1 });
     scene.particles.forEach((particle) => {
-      particle.setAttribute("r", "6");
+      particle.setAttribute("r", String(GEOMETRY.currentDotActiveR));
     });
     setCircuitProgress(1);
-    state.currentSpeedTarget = 190;
+    state.currentSpeedTarget = 176;
     elements.presentation.dataset.emphasis = "current";
   }
 
   function pageLenz() {
     pageCurrent();
     setFocus({ magnetic: 0.42, rod: 0.95, flux: 0.9, electric: 0.72, circuit: 1, current: 1, direction: 1, lenz: 1 });
-    state.rodBaseX = 388;
-    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
-    state.currentSpeedTarget = 208;
-    scene.lenzGroup.style.transform = "translate(0px, -2px) scale(1.08)";
+    state.rodBaseX = GEOMETRY.lenzRodX;
+    setTranslate(scene.rodGroup, state.rodBaseX, GEOMETRY.rodY, 0, 1, 1.05);
+    state.currentSpeedTarget = 162;
+    scene.lenzGroup.style.transform = "translate(0px, 0px) scale(1)";
+    scene.rodGlow.style.opacity = "0.42";
     elements.presentation.dataset.emphasis = "lenz";
   }
 
   function pageEnergy() {
-    setFocus({ magnetic: 0.12, rod: 0.05, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 1, converter: 1, generator: 0.88, skyline: 0.06 });
+    setFocus({ magnetic: 0.1, rod: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 1, converter: 0, generator: 0.7, skyline: 0 });
     reveal(scene.rodGroup, 0, 0);
     state.currentSpeedTarget = 0;
     elements.presentation.dataset.emphasis = "energy";
   }
 
   function pageApplications() {
-    pageEnergy();
-    setFocus({ magnetic: 0.22, rod: 0.08, electric: 0, circuit: 0.38, current: 0.88, direction: 0.78, lenz: 0, energy: 1, generator: 1, skyline: 1 });
-    reveal(scene.rodGroup, 0, 120);
-    scene.skyline.classList.add("lights-on");
-    state.currentSpeedTarget = 155;
-    state.applicationCycle = 0;
+    state.currentSpeedTarget = 0;
     setActiveApplicationCard(0);
   }
 
   function pageEddy() {
-    setFocus({ magnetic: 0.14, eddyField: 1, rod: 1, electric: 0.06, circuit: 0.1, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 0.2, generator: 0, skyline: 0.04 });
-    state.eddyPosition = 420;
-    state.eddyPulse = 0;
     state.currentSpeedTarget = 0;
-    scene.circuitPath.style.opacity = "0.12";
-    scene.skyline.classList.remove("lights-on");
     elements.presentation.dataset.emphasis = "eddy";
   }
 
@@ -754,13 +751,10 @@
     }
 
     if (state.page === 8) {
-      state.lenzPhase += dt * 3.2;
-      const opposition = state.reducedMotion ? 0.6 : (0.5 + 0.5 * Math.sin(state.lenzPhase));
-      scene.magneticField.style.transform = `translate(${-5 * opposition}px, 0px) scale(${1 - opposition * 0.02}, 1)`;
-      scene.magneticField.style.opacity = String(0.36 + opposition * 0.2);
-      scene.lenzGroup.style.transform = `translate(${-7 * opposition}px, -2px) scale(${1.06 + opposition * 0.05})`;
-      // Keep rod stable to avoid glitch-like jitter; opposition is shown by field deformation.
-      setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
+      scene.magneticField.style.transform = "translate(0px, 0px) scale(1, 1)";
+      scene.magneticField.style.opacity = "0.5";
+      scene.lenzGroup.style.transform = "translate(0px, 0px) scale(1)";
+      setTranslate(scene.rodGroup, state.rodBaseX, GEOMETRY.rodY, 0, 1, 1.05);
     }
 
     if (state.page === 3) {
@@ -794,8 +788,8 @@
 
       const moveEase = 0.5 - 0.5 * Math.cos(moveP * Math.PI);
       const moveVelocity = moveP < 1 ? Math.sin(moveP * Math.PI) : 0;
-      state.rodBaseX = 430 + moveEase * 132;
-      setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
+      state.rodBaseX = GEOMETRY.emfRodStartX + moveEase * GEOMETRY.rodTravelX;
+      setTranslate(scene.rodGroup, state.rodBaseX, GEOMETRY.rodY, 0, 1, 1.05);
 
       const separation = Math.max(separateP * 0.9, moveVelocity * 0.85);
       setElectronShift(3 + separation * 32);
@@ -817,7 +811,7 @@
 
       const waveAmp = 2 + emfP * 10;
       Array.from(scene.electricField.children).forEach((line, idx) => {
-        const baseY = 278 + idx * 20;
+        const baseY = GEOMETRY.electricFieldBaseY + idx * GEOMETRY.electricFieldStepY;
         const wave = Math.sin(t * 3.8 + idx * 0.85) * waveAmp;
         line.setAttribute("y1", (baseY + wave).toFixed(2));
         line.setAttribute("y2", (baseY - wave).toFixed(2));
@@ -830,27 +824,20 @@
       setElectronShift(state.currentChargeShift);
     }
 
-    if (state.page >= 9) {
+    if (state.page === 9) {
       state.generatorSpin += state.reducedMotion ? 0.3 : 2.3;
       setTranslate(scene.generator, 0, 0, state.generatorSpin, 1, 0.8);
     }
 
-    if (state.page >= 9) {
+    if (state.page === 9) {
       state.energyPhase += dt * 4;
       const shimmer = 0.6 + 0.4 * Math.sin(state.energyPhase * Math.PI);
       scene.energyFlow.style.opacity = String(Math.max(0.28, shimmer));
     }
 
-    if (state.page === 11) {
-      state.eddyPulse += dt * (state.reducedMotion ? 1.2 : 2.6);
-      const pulse = state.reducedMotion ? 0.55 : 0.5 + 0.5 * Math.sin(state.eddyPulse);
-      setTranslate(scene.rodGroup, state.eddyPosition, 320, 0, 1, 1.05);
-      scene.eddyLoops.style.opacity = String(0.12 + pulse * 0.5);
-      scene.eddyLoops.style.transform = `translate(0px, 0px) scale(${0.95 + pulse * 0.12})`;
-    }
-
-    const ambientX = Math.sin(ts * 0.00023) * 5;
-    const ambientY = Math.cos(ts * 0.00019) * 4;
+    const parallaxEnabled = state.page < 10;
+    const ambientX = parallaxEnabled ? Math.sin(ts * 0.00023) * 5 : 0;
+    const ambientY = parallaxEnabled ? Math.cos(ts * 0.00019) * 4 : 0;
     const targetX = state.parallaxTargetX + ambientX;
     const targetY = state.parallaxTargetY + ambientY;
     state.parallaxX += (targetX - state.parallaxX) * Math.min(1, dt * 2.6);
