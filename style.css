@@ -768,7 +768,6 @@ body {
 
 .rod-cap-glow {
   opacity: 0;
-  transition: opacity 380ms ease-out;
   transform-origin: center;
 }
 
@@ -780,9 +779,6 @@ body {
   fill: url(#glowRed);
 }
 
-.rod-cap {
-  transition: opacity 700ms ease;
-}
 
 .cap-negative {
   fill: rgba(89, 243, 255, 0.95);

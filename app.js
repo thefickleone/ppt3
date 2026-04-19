@@ -141,6 +141,11 @@
     return node;
   }
 
+  function markJsDriven(node) {
+    node.classList.add("js-driven");
+    return node;
+  }
+
   function initScene(svg) {
     svg.replaceChildren();
 
@@ -204,10 +209,10 @@
     const rodGlow = makeAnim(svgEl("rect", { x: "-8", y: "-8", width: "336", height: "40", rx: "16", class: "rod-glow" }), 0);
     rodGroup.append(rodGlow);
     rodGroup.append(svgEl("rect", { x: "0", y: "0", width: "320", height: "24", rx: "12", class: "rod" }));
-    const capGlowNeg = svgEl("circle", { cx: "12", cy: "12", r: "30", class: "rod-cap-glow cap-glow-negative" });
-    const capGlowPos = svgEl("circle", { cx: "308", cy: "12", r: "30", class: "rod-cap-glow cap-glow-positive" });
-    const negCap = svgEl("circle", { cx: "12", cy: "12", r: "14", class: "rod-cap cap-negative" });
-    const posCap = svgEl("circle", { cx: "308", cy: "12", r: "14", class: "rod-cap cap-positive" });
+    const capGlowNeg = markJsDriven(svgEl("circle", { cx: "12", cy: "12", r: "30", class: "rod-cap-glow cap-glow-negative" }));
+    const capGlowPos = markJsDriven(svgEl("circle", { cx: "308", cy: "12", r: "30", class: "rod-cap-glow cap-glow-positive" }));
+    const negCap = markJsDriven(svgEl("circle", { cx: "12", cy: "12", r: "14", class: "rod-cap cap-negative" }));
+    const posCap = markJsDriven(svgEl("circle", { cx: "308", cy: "12", r: "14", class: "rod-cap cap-positive" }));
     rodGroup.append(capGlowNeg, capGlowPos, negCap, posCap);
 
     const electrons = makeAnim(svgEl("g", { id: "electrons" }), 0);
@@ -216,12 +221,12 @@
     for (let i = 0; i < 10; i += 1) {
       const baseX = 18 + i * 29;
       const baseY = 10 + (i % 2 === 0 ? 5 : 15);
-      const electron = svgEl("circle", {
+      const electron = markJsDriven(svgEl("circle", {
         cx: String(baseX),
         cy: String(baseY),
         r: "3.8",
         class: "electron"
-      });
+      }));
       electrons.append(electron);
       electronNodes.push(electron);
       electronMeta.push({
@@ -303,7 +308,7 @@
     const currentParticles = makeAnim(svgEl("g", { id: "currentParticles" }), 0);
     const particles = [];
     for (let i = 0; i < 18; i += 1) {
-      const particle = svgEl("circle", { r: "4", class: "current-dot" });
+      const particle = markJsDriven(svgEl("circle", { r: "4", class: "current-dot" }));
       currentParticles.append(particle);
       particles.push(particle);
     }
