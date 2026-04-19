@@ -10,26 +10,31 @@ Single-scene, keyboard-controlled browser presentation for Engineering Physics (
 
 ## Controls
 
-- `ArrowRight` or `Space`: next dialogue line (then next step after last line)
-- `ArrowLeft`: previous dialogue line (or previous step last line)
+- `ArrowRight` or `Space`: next page
+- `ArrowLeft`: previous page
 - `R`: reload
 
-Steps run from `0` to `6`:
+Pages run from `0` to `11`:
 
-0. Hook
-1. Charge separation
-2. EMF creation
-3. Current flow
-4. Lenz's law
-5. Energy conversion (mechanical -> electrical)
-6. Applications / finale
+0. Intro
+1. Examples
+2. Rod question
+3. Motion
+4. EMF
+5. Derivation
+6. Simulation
+7. Current
+8. Lenz
+9. Energy
+10. Applications
+11. Eddy currents
 
 ## Presentation-complete additions
 
 - Clean visual-only physics scene in `#scene`
 - Dedicated explanation layer in `#overlay` (`#explanation`)
-- Step-synced one-line presenter explanation with smooth fade transitions
-- Full script system with per-step `lines[]` dialogue progression
+- Page-synced chapter explanation with smooth fade transitions
+- Full page-based chapter system (`0-11`) with explicit `page*` render functions
 - Current-direction arrows, Lenz resistance behavior, and energy-flow arrows
 
 ## Run locally

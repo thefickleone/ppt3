@@ -2,72 +2,7 @@
   "use strict";
 
   const NS = "http://www.w3.org/2000/svg";
-  const MAX_STEP = 6;
-  const steps = [
-    {
-      title: "Hook",
-      subtitle: "How does motion become electricity?",
-      lines: [
-        "We begin with a simple question: how can pure motion create electrical output?",
-        "No circuit tricks yet, just motion and a magnetic field.",
-        "Now watch how charge behavior reveals the answer."
-      ]
-    },
-    {
-      title: "Charge Separation",
-      subtitle: "Moving charges are pushed by v x B.",
-      lines: [
-        "As the rod moves right, electrons drift toward one end.",
-        "The left end accumulates negative charge; the right end becomes positive.",
-        "Polarity is now established across the conductor."
-      ]
-    },
-    {
-      title: "EMF Creation",
-      subtitle: "Potential difference builds across the rod.",
-      lines: [
-        "Charge separation causes an internal electric field to appear inside the rod.",
-        "Cause to effect: magnetic push separates charge, electric field pushes back.",
-        "This balance sets the motional EMF magnitude: epsilon equals B l v."
-      ]
-    },
-    {
-      title: "Current Flow",
-      subtitle: "A closed loop lets current circulate.",
-      lines: [
-        "Now the circuit closes and the voltage has a complete path.",
-        "Moving particles show current direction around the full loop.",
-        "Current is now sustained by continued rod motion in the magnetic field."
-      ]
-    },
-    {
-      title: "Lenz's Law",
-      subtitle: "Induced effects oppose the change in flux.",
-      lines: [
-        "The induced current creates a magnetic effect opposing the motion.",
-        "That opposition appears as an effective resisting force.",
-        "Without extra input, the rod motion slows under this resistance."
-      ]
-    },
-    {
-      title: "Energy Conversion",
-      subtitle: "Mechanical -> Electrical",
-      lines: [
-        "External mechanical work enters the system as rod/generator motion.",
-        "Energy-flow arrows show conversion from mechanical input to electrical output.",
-        "The converter stage links force, motion, and current into usable power."
-      ]
-    },
-    {
-      title: "Applications",
-      subtitle: "Generator to city-scale power",
-      lines: [
-        "A generator is this same physics repeated continuously by rotation.",
-        "Electrical output powers distributed loads, visualized here as city lighting.",
-        "Motional EMF scales from classroom experiment to real infrastructure."
-      ]
-    }
-  ];
+  const MAX_PAGE = 11;
 
   const elements = {
     presentation: document.getElementById("presentation"),
@@ -78,15 +13,12 @@
     explanation: document.getElementById("explanation")
   };
 
-  if (
-    !elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation
-  ) {
+  if (!elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation) {
     return;
   }
 
   const state = {
-    step: 0,
-    lineIndex: 0,
+    page: 0,
     transitionToken: 0,
     currentOffset: 0,
     currentSpeed: 0,
@@ -96,16 +28,87 @@
     lenzPhase: 0,
     energyPhase: 0,
     overlayTimer: null,
-    lineStartedAt: 0,
-    nextAdvanceAt: 0,
-    animationDelayMs: 220,
-    animationDurationMs: 980,
     inputCooldownUntil: 0,
     lastTs: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
   };
 
   const scene = initScene(elements.svg);
+
+  const pages = [
+    {
+      title: "Motional EMF",
+      subtitle: "How does motion become electricity?",
+      explanation: "Chapter 1: Start with the central question and hold focus on the magnetic environment.",
+      render: pageIntro
+    },
+    {
+      title: "Real-World Examples",
+      subtitle: "Motion and electricity already surround us",
+      explanation: "Chapter 2: Fans, bike dynamos, and turbines all convert motion into electrical effects.",
+      render: pageExamples
+    },
+    {
+      title: "Rod Question",
+      subtitle: "What if a conductor moves through B?",
+      explanation: "Chapter 3: Introduce the rod in isolation and ask what force acts on free charges.",
+      render: pageRodQuestion
+    },
+    {
+      title: "Motion and Separation",
+      subtitle: "v x B pushes charges apart",
+      explanation: "Chapter 4: As the rod moves, electrons drift and clear polarity builds at opposite ends.",
+      render: pageMotion
+    },
+    {
+      title: "EMF Formation",
+      subtitle: "Internal field appears",
+      explanation: "Chapter 5: Separation creates an internal electric field that leads to a measurable EMF.",
+      render: pageEMF
+    },
+    {
+      title: "Derivation",
+      subtitle: "epsilon = B l v",
+      explanation: "Chapter 6: Emphasize the relation between field strength, rod length, and speed.",
+      render: pageDerivation
+    },
+    {
+      title: "Simulation View",
+      subtitle: "Full setup before current",
+      explanation: "Chapter 7: Assemble the scene with rod, field, and loop to preview the complete model.",
+      render: pageSimulation
+    },
+    {
+      title: "Current Flow",
+      subtitle: "Closed loop conduction",
+      explanation: "Chapter 8: Closing the loop drives visible charge flow with clear current direction.",
+      render: pageCurrent
+    },
+    {
+      title: "Lenz's Law",
+      subtitle: "Opposition to change",
+      explanation: "Chapter 9: Induced effects resist motion, slowing the rod unless extra work is supplied.",
+      render: pageLenz
+    },
+    {
+      title: "Energy Conversion",
+      subtitle: "Mechanical to electrical",
+      explanation: "Chapter 10: Energy arrows show mechanical input transformed into electrical output.",
+      render: pageEnergy
+    },
+    {
+      title: "Applications",
+      subtitle: "Generator to city power",
+      explanation: "Chapter 11: Rotational induction scales to practical generation and city lighting.",
+      render: pageApplications
+    },
+    {
+      title: "Eddy Currents",
+      subtitle: "Induced loops in bulk conductors",
+      explanation: "Chapter 12: Changing magnetic fields induce circulating currents that dissipate energy as heat.",
+      render: pageEddy
+    }
+  ];
 
   function svgEl(tag, attrs = {}) {
     const node = document.createElementNS(NS, tag);
@@ -263,7 +266,7 @@
   }
 
   function setOverlay() {
-    const copy = steps[state.step];
+    const copy = pages[state.page];
     elements.presentation.classList.add("overlay-out");
     if (state.overlayTimer) {
       window.clearTimeout(state.overlayTimer);
@@ -271,47 +274,18 @@
     state.overlayTimer = window.setTimeout(() => {
       elements.title.textContent = copy.title;
       elements.subtitle.textContent = copy.subtitle;
-      elements.explanation.textContent = copy.lines[state.lineIndex] || "";
+      elements.explanation.textContent = copy.explanation;
       elements.presentation.classList.remove("overlay-out");
     }, state.reducedMotion ? 0 : 170);
   }
 
-  function getLineTiming(step, lineIndex) {
-    const key = `${step}:${lineIndex}`;
-    const map = {
-      "2:2": { minAdvanceMs: 900, animationDelayMs: 260, animationDurationMs: 1100 },
-      "3:1": { minAdvanceMs: 820, animationDelayMs: 220, animationDurationMs: 980 },
-      "4:1": { minAdvanceMs: 850, animationDelayMs: 260, animationDurationMs: 1080 }
-    };
-    return map[key] || { minAdvanceMs: 700, animationDelayMs: 220, animationDurationMs: 980 };
-  }
-
-  function getWithinLineMotion() {
-    if (state.reducedMotion) return 1;
-    const elapsed = performance.now() - state.lineStartedAt;
-    const active = Math.max(0, elapsed - state.animationDelayMs);
-    const t = Math.min(1, active / state.animationDurationMs);
-    // Smooth ramp so visuals follow speech naturally.
-    return t * t * (3 - 2 * t);
-  }
-
-  function getLineProgress() {
-    const lineCount = steps[state.step].lines.length;
-    if (lineCount <= 1) return 1;
-    const base = state.lineIndex / (lineCount - 1);
-    const span = 1 / (lineCount - 1);
-    return Math.min(1, base + span * getWithinLineMotion());
-  }
-
   function updateProgressUI() {
-    const totalLines = steps[state.step].lines.length;
-    elements.stepValue.textContent = `${state.step} / ${MAX_STEP} · ${state.lineIndex + 1}/${totalLines}`;
+    elements.stepValue.textContent = `${state.page} / ${MAX_PAGE}`;
   }
 
-  function setStep(nextStep, instant = false, lineIndex = 0) {
-    const clamped = Math.max(0, Math.min(MAX_STEP, nextStep));
-    const nextLine = Math.max(0, Math.min((steps[clamped]?.lines.length || 1) - 1, lineIndex));
-    if (clamped === state.step && nextLine === state.lineIndex && !instant) return;
+  function setPage(nextPage, instant = false) {
+    const clamped = Math.max(0, Math.min(MAX_PAGE, nextPage));
+    if (clamped === state.page && !instant) return;
 
     const token = ++state.transitionToken;
     scene.skyline.classList.remove("lights-on");
@@ -322,51 +296,31 @@
     if (!instant) {
       scene.electricField.style.opacity = "0";
       scene.lenzGroup.style.opacity = "0";
-      scene.generator.style.opacity = state.step >= 5 ? "0.35" : scene.generator.style.opacity;
-      scene.skyline.style.opacity = state.step >= 5 ? "0.25" : scene.skyline.style.opacity;
+      scene.generator.style.opacity = state.page >= 9 ? "0.35" : scene.generator.style.opacity;
+      scene.skyline.style.opacity = state.page >= 10 ? "0.25" : scene.skyline.style.opacity;
       state.currentSpeedTarget = 0;
     }
 
     const delay = instant || state.reducedMotion ? 0 : 260;
     window.setTimeout(() => {
       if (token !== state.transitionToken) return;
-      state.step = clamped;
-      state.lineIndex = nextLine;
-      const timing = getLineTiming(state.step, state.lineIndex);
-      state.lineStartedAt = performance.now();
-      state.nextAdvanceAt = state.lineStartedAt + (state.reducedMotion ? 0 : timing.minAdvanceMs);
-      state.animationDelayMs = timing.animationDelayMs;
-      state.animationDurationMs = timing.animationDurationMs;
+      state.page = clamped;
       updateProgressUI();
-      elements.presentation.dataset.step = String(state.step);
-      renderStep();
+      elements.presentation.dataset.page = String(state.page);
+      renderPage();
       elements.presentation.classList.remove("scene-transitioning");
     }, delay);
   }
 
-  function advanceScript() {
-    if (!state.reducedMotion && performance.now() < state.nextAdvanceAt) {
-      return;
-    }
-    const lines = steps[state.step].lines;
-    if (state.lineIndex < lines.length - 1) {
-      setStep(state.step, false, state.lineIndex + 1);
-      return;
-    }
-    if (state.step < MAX_STEP) {
-      setStep(state.step + 1, false, 0);
+  function nextPage() {
+    if (state.page < MAX_PAGE) {
+      setPage(state.page + 1);
     }
   }
 
-  function rewindScript() {
-    if (state.lineIndex > 0) {
-      setStep(state.step, false, state.lineIndex - 1);
-      return;
-    }
-    if (state.step > 0) {
-      const prevStep = state.step - 1;
-      const lastLine = steps[prevStep].lines.length - 1;
-      setStep(prevStep, false, lastLine);
+  function prevPage() {
+    if (state.page > 0) {
+      setPage(state.page - 1);
     }
   }
 
@@ -420,74 +374,96 @@
     elements.subtitle.classList.remove("intro-subtitle");
   }
 
-  function intro(progress) {
-    const magnetic = 0.22 + progress * 0.1;
-    setFocus({ magnetic, rod: 0 });
+  function pageIntro() {
+    setFocus({ magnetic: 0.28, rod: 0 });
     elements.title.classList.add("intro-title");
     elements.subtitle.classList.add("intro-subtitle");
   }
 
-  function chargeSeparation(progress) {
-    setFocus({ magnetic: 0.34 + progress * 0.16, rod: 0.75 + progress * 0.25 });
-    state.rodBaseX = 280 + progress * 160;
+  function pageExamples() {
+    setFocus({ magnetic: 0.25, generator: 0.36, skyline: 0.2, energy: 0.24 });
+    state.currentSpeedTarget = 42;
+  }
+
+  function pageRodQuestion() {
+    setFocus({ magnetic: 0.32, rod: 1 });
+    state.rodBaseX = 430;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
-    reveal(scene.negCap, 0.5 + progress * 0.5, 280);
-    reveal(scene.posCap, 0.5 + progress * 0.5, 380);
-    setElectronShift(10 + progress * 26);
+    reveal(scene.negCap, 0.35, 160);
+    reveal(scene.posCap, 0.35, 210);
+    setElectronShift(4);
   }
 
-  function emf(progress) {
-    chargeSeparation(0.8 + progress * 0.2);
-    setFocus({ magnetic: 0.42, rod: 0.95, electric: 0.42 + progress * 0.58 });
-  }
-
-  function current(progress) {
-    emf(1);
-    setFocus({ magnetic: 0.32, rod: 0.92, electric: 0.78, circuit: 1, current: 0.55 + progress * 0.45, direction: 0.25 + progress * 0.75 });
-    setCircuitProgress(progress);
-    state.currentSpeedTarget = 90 + progress * 90;
-  }
-
-  function lenz(progress) {
-    current(1);
-    setFocus({ magnetic: 0.3, rod: 0.95, electric: 0.74, circuit: 1, current: 1, direction: 1, lenz: 0.3 + progress * 0.7 });
-    state.rodBaseX = 420 - progress * 18;
+  function pageMotion() {
+    setFocus({ magnetic: 0.46, rod: 1 });
+    state.rodBaseX = 460;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
-    state.currentSpeedTarget = 70 + progress * 20;
+    reveal(scene.negCap, 1, 200);
+    reveal(scene.posCap, 1, 260);
+    setElectronShift(34);
   }
 
-  function energyConversion(progress) {
-    lenz(1);
-    setFocus({ magnetic: 0.24, rod: 0.8 - progress * 0.5, electric: 0.3 * (1 - progress), circuit: 0.58, current: 0.9, direction: 0.85, lenz: 0.25, energy: 0.25 + progress * 0.75, generator: 0.42 + progress * 0.58, skyline: 0.2 + progress * 0.2 });
-    state.currentSpeedTarget = 105 + progress * 25;
+  function pageEMF() {
+    pageMotion();
+    setFocus({ magnetic: 0.42, rod: 1, electric: 1 });
   }
 
-  function applications(progress) {
-    energyConversion(1);
-    setFocus({ magnetic: 0.22, rod: 0.2 * (1 - progress), electric: 0, circuit: 0.45, current: 0.95, direction: 0.85, lenz: 0, energy: 0.35 + progress * 0.65, generator: 0.9 + progress * 0.1, skyline: 0.45 + progress * 0.55 });
+  function pageDerivation() {
+    pageEMF();
+    setFocus({ magnetic: 0.36, rod: 0.92, electric: 1 });
+    elements.presentation.dataset.emphasis = "equation";
+  }
+
+  function pageSimulation() {
+    pageEMF();
+    setFocus({ magnetic: 0.34, rod: 0.92, electric: 0.85, circuit: 0.78, direction: 0.55 });
+    setCircuitProgress(0.78);
+  }
+
+  function pageCurrent() {
+    pageSimulation();
+    setFocus({ magnetic: 0.32, rod: 0.9, electric: 0.74, circuit: 1, current: 1, direction: 1 });
+    setCircuitProgress(1);
+    state.currentSpeedTarget = 170;
+    elements.presentation.dataset.emphasis = "current";
+  }
+
+  function pageLenz() {
+    pageCurrent();
+    setFocus({ magnetic: 0.3, rod: 0.95, electric: 0.72, circuit: 1, current: 1, direction: 1, lenz: 1 });
+    state.rodBaseX = 404;
+    setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
+    state.currentSpeedTarget = 82;
+    elements.presentation.dataset.emphasis = "lenz";
+  }
+
+  function pageEnergy() {
+    pageLenz();
+    setFocus({ magnetic: 0.24, rod: 0.55, electric: 0.2, circuit: 0.62, current: 0.9, direction: 0.9, lenz: 0.3, energy: 1, generator: 0.72, skyline: 0.18 });
+    state.currentSpeedTarget = 118;
+  }
+
+  function pageApplications() {
+    pageEnergy();
+    setFocus({ magnetic: 0.22, rod: 0.08, electric: 0, circuit: 0.38, current: 0.88, direction: 0.78, lenz: 0, energy: 1, generator: 1, skyline: 1 });
     reveal(scene.rodGroup, 0, 120);
     scene.skyline.classList.add("lights-on");
-    state.currentSpeedTarget = 135 + progress * 45;
+    state.currentSpeedTarget = 155;
   }
 
-  function renderStep() {
+  function pageEddy() {
+    setFocus({ magnetic: 0.56, rod: 0, electric: 0.2, circuit: 0.9, current: 1, direction: 1, lenz: 0.6, energy: 0.26, generator: 0.28, skyline: 0.12 });
+    setCircuitProgress(1);
+    state.currentSpeedTarget = 118;
+    scene.skyline.classList.remove("lights-on");
+  }
+
+  function renderPage() {
     setOverlay();
     state.currentSpeedTarget = 0;
     resetVisuals();
-    const progress = getLineProgress();
-    if (state.step === 0) intro(progress);
-    if (state.step === 1) chargeSeparation(progress);
-    if (state.step === 2) emf(progress);
-    if (state.step === 3) current(progress);
-    if (state.step === 4) lenz(progress);
-    if (state.step === 5) energyConversion(progress);
-    if (state.step === 6) applications(progress);
-
-    const emphasis =
-      state.step === 2 ? "equation" :
-      state.step === 3 ? "current" :
-      state.step === 4 ? "lenz" : "none";
-    elements.presentation.dataset.emphasis = emphasis;
+    elements.presentation.dataset.emphasis = "none";
+    pages[state.page].render();
   }
 
   function animateFrame(ts) {
@@ -497,7 +473,7 @@
 
     state.currentSpeed += (state.currentSpeedTarget - state.currentSpeed) * Math.min(1, dt * 5.5);
 
-    if (state.step >= 3) {
+    if (state.page >= 7) {
       state.currentOffset = (state.currentOffset + state.currentSpeed * dt) % scene.circuitLen;
       const spacing = scene.circuitLen / scene.particles.length;
       scene.particles.forEach((particle, idx) => {
@@ -507,18 +483,18 @@
       });
     }
 
-    if (state.step === 4) {
+    if (state.page === 8) {
       state.lenzPhase += dt * 24;
       const resistance = Math.sin(state.lenzPhase) * (state.reducedMotion ? 0 : 2.4);
       setTranslate(scene.rodGroup, state.rodBaseX + resistance, 320, 0);
     }
 
-    if (state.step >= 5) {
+    if (state.page >= 9) {
       state.generatorSpin += state.reducedMotion ? 0.3 : 2.3;
       setTranslate(scene.generator, 0, 0, state.generatorSpin);
     }
 
-    if (state.step >= 5) {
+    if (state.page >= 9) {
       state.energyPhase += dt * 4;
       const shimmer = 0.6 + 0.4 * Math.sin(state.energyPhase * Math.PI);
       scene.energyFlow.style.opacity = String(Math.max(0.28, shimmer));
@@ -534,13 +510,13 @@
 
     if (event.code === "ArrowRight" || event.code === "Space") {
       event.preventDefault();
-      advanceScript();
+      nextPage();
       state.inputCooldownUntil = now + 95;
       return;
     }
     if (event.code === "ArrowLeft") {
       event.preventDefault();
-      rewindScript();
+      prevPage();
       state.inputCooldownUntil = now + 95;
       return;
     }
@@ -550,7 +526,7 @@
     }
   });
 
-  setStep(0, true, 0);
+  setPage(0, true);
   window.requestAnimationFrame(animateFrame);
 })();
 

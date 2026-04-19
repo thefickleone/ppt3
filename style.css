@@ -184,18 +184,32 @@ body {
   text-shadow: 0 0 16px rgba(89, 243, 255, 0.2);
 }
 
-#presentation[data-step="0"] #title,
-#presentation[data-step="0"] #subtitle {
+#presentation[data-page="0"] #title,
+#presentation[data-page="0"] #subtitle {
   opacity: 1;
   transform: translateY(0px);
   filter: blur(0px);
 }
 
-#presentation:not([data-step="0"]) #title,
-#presentation:not([data-step="0"]) #subtitle {
+#presentation:not([data-page="0"]) #title,
+#presentation:not([data-page="0"]) #subtitle {
   opacity: 0.94;
   transform: translateY(0px);
   filter: blur(0px);
+}
+
+#presentation[data-page="0"] .bg-grid,
+#presentation[data-page="1"] .bg-grid,
+#presentation[data-page="2"] .bg-grid {
+  opacity: 0.42;
+}
+
+#presentation[data-page="7"] .bg-grid,
+#presentation[data-page="8"] .bg-grid,
+#presentation[data-page="9"] .bg-grid,
+#presentation[data-page="10"] .bg-grid,
+#presentation[data-page="11"] .bg-grid {
+  opacity: 0.58;
 }
 
 #presentation.overlay-out #title,
