@@ -4,12 +4,72 @@
   const NS = "http://www.w3.org/2000/svg";
   const MAX_STEP = 5;
   const STEP_COPY = [
-    { title: "Motional EMF", subtitle: "How does motion become electricity?" },
-    { title: "Charge Separation", subtitle: "Moving charges are pushed by v x B." },
-    { title: "EMF Creation", subtitle: "Potential difference builds across the rod." },
-    { title: "Current Flow", subtitle: "A closed loop lets current circulate." },
-    { title: "Lenz's Law", subtitle: "Induced effects oppose the change in flux." },
-    { title: "Applications", subtitle: "Mechanical motion powers real electrical loads." }
+    {
+      title: "Motional EMF",
+      subtitle: "How does motion become electricity?",
+      caption: "A conductor moving through a magnetic field pushes charges apart. That separation creates voltage.",
+      equationLabel: "Setup",
+      legend: [
+        ["#7cc9ff", "Magnetic field into the screen"],
+        ["#c3d7ef", "Conductor path"]
+      ],
+      note: "Open with a question: motion is mechanical, electricity is electrical. This bridge is Faraday induction in action."
+    },
+    {
+      title: "Charge Separation",
+      subtitle: "Moving charges are pushed by v x B.",
+      caption: "As the rod moves right, free electrons drift toward one end. One side becomes negative and the other positive.",
+      equationLabel: "Force",
+      legend: [
+        ["#59f3ff", "Electrons (negative charge)"],
+        ["#ff5f6d", "Positive end of rod"]
+      ],
+      note: "Point to the blue and red ends. Emphasize that charge imbalance appears before current flows in a loop."
+    },
+    {
+      title: "EMF Creation",
+      subtitle: "Potential difference builds across the rod.",
+      caption: "The separated charges create an internal electric field that balances magnetic push at steady speed.",
+      equationLabel: "Motional EMF: ε = Bℓv",
+      legend: [
+        ["#6af2ff", "Electric field inside conductor"],
+        ["#e8f6ff", "Voltage expression"]
+      ],
+      note: "Explain symbols: B magnetic field strength, l rod length in field, v rod speed."
+    },
+    {
+      title: "Current Flow",
+      subtitle: "A closed loop lets current circulate.",
+      caption: "When the circuit closes, EMF drives charge around the loop. Mechanical work now feeds electrical power.",
+      equationLabel: "Circuit Active",
+      legend: [
+        ["#aac4ff", "Conducting loop"],
+        ["#9af7ff", "Current carriers"]
+      ],
+      note: "Show that current direction is consistent with the induced polarity and loop geometry."
+    },
+    {
+      title: "Lenz's Law",
+      subtitle: "Induced effects oppose the change in flux.",
+      caption: "The induced current generates an opposing magnetic effect, so an external force is required to keep moving.",
+      equationLabel: "Opposition",
+      legend: [
+        ["#8ad8ff", "Opposing force direction"],
+        ["#9af7ff", "Stronger induced current"]
+      ],
+      note: "Stress energy conservation: no free energy. You must do mechanical work against the induced opposition."
+    },
+    {
+      title: "Applications",
+      subtitle: "Mechanical motion powers real electrical loads.",
+      caption: "Generators scale this same principle: rotation through magnetic fields lights homes, labs, and cities.",
+      equationLabel: "Generator Principle",
+      legend: [
+        ["#59f3ff", "Rotating generator element"],
+        ["#ffe58a", "Delivered electrical output"]
+      ],
+      note: "Close by connecting classroom physics to turbines, alternators, and sustainable power systems."
+    }
   ];
 
   const elements = {
@@ -17,10 +77,17 @@
     svg: document.getElementById("sceneSvg"),
     title: document.getElementById("title"),
     subtitle: document.getElementById("subtitle"),
-    stepValue: document.getElementById("stepValue")
+    stepValue: document.getElementById("stepValue"),
+    caption: document.getElementById("stepCaption"),
+    equationChip: document.getElementById("equationChip"),
+    legend: document.getElementById("legend"),
+    notesPanel: document.getElementById("notesPanel")
   };
 
-  if (!elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue) {
+  if (
+    !elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue ||
+    !elements.caption || !elements.equationChip || !elements.legend || !elements.notesPanel
+  ) {
     return;
   }
 
@@ -34,6 +101,8 @@
     rodBaseX: 140,
     lenzPhase: 0,
     overlayTimer: null,
+    showHelp: false,
+    showNotes: false,
     lastTs: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
   };
@@ -195,8 +264,33 @@
     state.overlayTimer = window.setTimeout(() => {
       elements.title.textContent = copy.title;
       elements.subtitle.textContent = copy.subtitle;
+      elements.caption.textContent = copy.caption;
+      elements.equationChip.textContent = copy.equationLabel;
+      elements.notesPanel.textContent = copy.note;
+      renderLegend(copy.legend);
       elements.presentation.classList.remove("overlay-out");
     }, state.reducedMotion ? 0 : 170);
+  }
+
+  function renderLegend(items) {
+    const frag = document.createDocumentFragment();
+    items.forEach(([color, label]) => {
+      const key = document.createElement("span");
+      key.className = "key";
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.color = color;
+      const text = document.createElement("span");
+      text.textContent = label;
+      key.append(dot, text);
+      frag.append(key);
+    });
+    elements.legend.replaceChildren(frag);
+  }
+
+  function syncAuxPanels() {
+    elements.presentation.classList.toggle("show-help", state.showHelp);
+    elements.presentation.classList.toggle("hide-notes", !state.showNotes);
   }
 
   function setStep(nextStep, instant = false) {
@@ -374,9 +468,20 @@
     }
     if (event.code === "KeyR") {
       window.location.reload();
+      return;
+    }
+    if (event.code === "KeyH") {
+      state.showHelp = !state.showHelp;
+      syncAuxPanels();
+      return;
+    }
+    if (event.code === "KeyN") {
+      state.showNotes = !state.showNotes;
+      syncAuxPanels();
     }
   });
 
+  syncAuxPanels();
   setStep(0, true);
   window.requestAnimationFrame(animateFrame);
 })();

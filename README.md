@@ -13,6 +13,8 @@ Single-scene, keyboard-controlled browser presentation for Engineering Physics (
 - `ArrowRight` or `Space`: next step
 - `ArrowLeft`: previous step
 - `R`: reload
+- `H`: toggle help hints
+- `N`: toggle presenter notes
 
 Steps run from `0` to `5`:
 
@@ -22,6 +24,13 @@ Steps run from `0` to `5`:
 3. Current flow
 4. Lenz's law
 5. Applications / finale
+
+## Presentation-complete additions
+
+- Step-specific teaching captions synchronized with transitions
+- Equation/state chips for quick concept framing
+- Color legend per step (charge/field/current meaning)
+- Optional presenter notes overlay for live delivery
 
 ## Run locally
 
