@@ -13,12 +13,18 @@
     explanation: document.getElementById("explanation"),
     velocitySlider: document.getElementById("velocitySlider"),
     velocityValue: document.getElementById("velocityValue"),
+    velocityControl: document.getElementById("velocityControl"),
+    velocityActive: document.getElementById("velocityActive"),
+    velocityThumb: document.getElementById("velocityThumb"),
+    velocityThumbGlow: document.getElementById("velocityThumbGlow"),
     applicationCards: Array.from(document.querySelectorAll("#applicationCards .app-card"))
   };
 
   if (
     !elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
-    !elements.velocitySlider || !elements.velocityValue || elements.applicationCards.length === 0
+    !elements.velocitySlider || !elements.velocityValue ||
+    !elements.velocityControl || !elements.velocityActive || !elements.velocityThumb || !elements.velocityThumbGlow ||
+    elements.applicationCards.length === 0
   ) {
     return;
   }
@@ -44,6 +50,7 @@
     energyPhase: 0,
     overlayTimer: null,
     inputCooldownUntil: 0,
+    sliderDragging: false,
     lastTs: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
   };
@@ -518,6 +525,26 @@
 
   function updateSimulationUI() {
     elements.velocityValue.textContent = state.simulationVelocity.toFixed(2);
+    const x = 40 + state.simulationVelocity * 600;
+    elements.velocityActive.setAttribute("x2", x.toFixed(2));
+    elements.velocityThumb.setAttribute("cx", x.toFixed(2));
+    elements.velocityThumbGlow.setAttribute("cx", x.toFixed(2));
+  }
+
+  function setSimulationVelocity(value) {
+    state.simulationVelocity = Math.max(0, Math.min(1, value));
+    elements.velocitySlider.value = String(Math.round(state.simulationVelocity * 100));
+    updateSimulationUI();
+    if (state.page === 6) {
+      updateSimulationFromVelocity(0);
+    }
+  }
+
+  function updateVelocityFromPointer(clientX) {
+    const rect = elements.velocityControl.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const t = (clientX - rect.left) / rect.width;
+    setSimulationVelocity(t);
   }
 
   function updateSimulationFromVelocity(dt = 0) {
@@ -833,11 +860,21 @@
   });
 
   elements.velocitySlider.addEventListener("input", () => {
-    state.simulationVelocity = Number(elements.velocitySlider.value) / 100;
-    updateSimulationUI();
-    if (state.page === 6) {
-      updateSimulationFromVelocity(0);
-    }
+    setSimulationVelocity(Number(elements.velocitySlider.value) / 100);
+  });
+
+  elements.velocityControl.addEventListener("mousedown", (event) => {
+    state.sliderDragging = true;
+    updateVelocityFromPointer(event.clientX);
+  });
+
+  window.addEventListener("mousemove", (event) => {
+    if (!state.sliderDragging) return;
+    updateVelocityFromPointer(event.clientX);
+  });
+
+  window.addEventListener("mouseup", () => {
+    state.sliderDragging = false;
   });
 
   elements.applicationCards.forEach((card) => {
@@ -852,7 +889,7 @@
 
   setActiveApplicationCard(elements.applicationCards[0]);
 
-  updateSimulationUI();
+  setSimulationVelocity(state.simulationVelocity);
 
   setPage(0, true);
   window.requestAnimationFrame(animateFrame);
