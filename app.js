@@ -39,7 +39,7 @@
     {
       title: "Motional EMF",
       subtitle: "How does motion become electricity?",
-      explanation: "Chapter 1: Start with the central question and hold focus on the magnetic environment.",
+      explanation: "",
       render: pageIntro
     },
     {
