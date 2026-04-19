@@ -472,6 +472,7 @@
     scene.circuitPath.classList.remove("drawn");
     scene.circuitPath.style.strokeDashoffset = "1300";
     scene.skyline.classList.remove("lights-on");
+    scene.lenzGroup.style.transform = "translate(0px, 0px) scale(1)";
     reveal(scene.negCap, 0, 120);
     reveal(scene.posCap, 0, 180);
     scene.negCap.style.filter = "";
@@ -543,9 +544,10 @@
   function pageLenz() {
     pageCurrent();
     setFocus({ magnetic: 0.3, rod: 0.95, electric: 0.72, circuit: 1, current: 1, direction: 1, lenz: 1 });
-    state.rodBaseX = 404;
+    state.rodBaseX = 388;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
-    state.currentSpeedTarget = 82;
+    state.currentSpeedTarget = 208;
+    scene.lenzGroup.style.transform = "translate(0px, -2px) scale(1.08)";
     elements.presentation.dataset.emphasis = "lenz";
   }
 
@@ -601,9 +603,10 @@
     }
 
     if (state.page === 8) {
-      state.lenzPhase += dt * 24;
-      const resistance = Math.sin(state.lenzPhase) * (state.reducedMotion ? 0 : 2.4);
-      setTranslate(scene.rodGroup, state.rodBaseX + resistance, 320, 0);
+      state.lenzPhase += dt * 20;
+      const resistance = Math.sin(state.lenzPhase) * (state.reducedMotion ? 0 : 1.7);
+      const drag = state.reducedMotion ? 0 : Math.sin(state.lenzPhase * 0.5) * 3.2;
+      setTranslate(scene.rodGroup, state.rodBaseX - Math.abs(drag) + resistance, 320, 0);
     }
 
     if (state.page === 3) {

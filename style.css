@@ -642,6 +642,16 @@ body {
   filter: drop-shadow(0 0 6px rgba(89, 243, 255, 0.42));
 }
 
+#presentation[data-page="8"] .lenz-arrow {
+  stroke: rgba(131, 224, 255, 1);
+  stroke-width: 5.8;
+  filter: drop-shadow(0 0 10px rgba(89, 243, 255, 0.75));
+}
+
+#presentation[data-page="8"] .rod {
+  filter: drop-shadow(0 0 12px rgba(255, 140, 140, 0.24));
+}
+
 #presentation[data-emphasis="lenz"] .lenz-arrow {
   animation: emphasisGlow 980ms ease-in-out infinite;
   stroke: rgba(120, 214, 255, 1);
