@@ -677,6 +677,53 @@ body {
   stroke-linecap: round;
 }
 
+.mech-block {
+  fill: rgba(255, 157, 107, 0.2);
+  stroke: rgba(255, 170, 120, 0.72);
+  stroke-width: 1.5;
+}
+
+.elec-block {
+  fill: rgba(89, 243, 255, 0.2);
+  stroke: rgba(126, 236, 255, 0.78);
+  stroke-width: 1.5;
+}
+
+.transform-core {
+  fill: rgba(229, 247, 255, 0.95);
+  filter: drop-shadow(0 0 10px rgba(89, 243, 255, 0.8));
+}
+
+.transform-ring {
+  fill: none;
+  stroke: rgba(141, 231, 255, 0.72);
+  stroke-width: 1.6;
+  transform-origin: center;
+}
+
+#presentation[data-page="9"] .bg-gradient {
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 157, 107, 0.12), transparent 44%),
+    radial-gradient(circle at 72% 30%, rgba(89, 243, 255, 0.12), transparent 46%),
+    linear-gradient(160deg, #070a14, #0a1222);
+}
+
+#presentation[data-page="9"] .transform-core {
+  animation: coreTransfer 1100ms ease-in-out infinite;
+}
+
+#presentation[data-page="9"] .transform-ring {
+  animation: ringTransfer 1200ms ease-in-out infinite;
+}
+
+#presentation[data-page="9"] .mech-arrow {
+  animation: mechPulse 1000ms ease-in-out infinite;
+}
+
+#presentation[data-page="9"] .elec-arrow {
+  animation: elecPulse 1000ms ease-in-out infinite;
+}
+
 .generator-ring {
   fill: rgba(89, 243, 255, 0.12);
   stroke: rgba(148, 222, 255, 0.95);
@@ -803,6 +850,49 @@ body {
   }
 }
 
+@keyframes coreTransfer {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.16);
+    opacity: 1;
+  }
+}
+
+@keyframes ringTransfer {
+  0% {
+    transform: scale(0.76);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.42);
+    opacity: 0;
+  }
+}
+
+@keyframes mechPulse {
+  0%,
+  100% {
+    stroke-opacity: 0.62;
+  }
+  50% {
+    stroke-opacity: 1;
+  }
+}
+
+@keyframes elecPulse {
+  0%,
+  100% {
+    stroke-opacity: 0.62;
+  }
+  50% {
+    stroke-opacity: 1;
+  }
+}
+
 @keyframes emfFieldGrow {
   0%,
   100% {
@@ -859,7 +949,11 @@ body {
   .rod-length-marker,
   .rod-field-arrow,
   .emf-core,
-  .emf-ring {
+  .emf-ring,
+  .transform-core,
+  .transform-ring,
+  .mech-arrow,
+  .elec-arrow {
     transition-duration: 0.01ms !important;
     animation: none !important;
   }

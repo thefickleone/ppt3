@@ -270,6 +270,15 @@
       svgEl("line", { x1: "600", y1: "245", x2: "600", y2: "290", class: "energy-link", "marker-end": "url(#arrowHead)" })
     );
 
+    const energyConverter = makeAnim(svgEl("g", { id: "energyConverter" }), 0);
+    energyConverter.append(
+      svgEl("rect", { x: "500", y: "178", width: "78", height: "68", rx: "12", class: "mech-block" }),
+      svgEl("rect", { x: "622", y: "178", width: "78", height: "68", rx: "12", class: "elec-block" }),
+      svgEl("circle", { cx: "600", cy: "212", r: "14", class: "transform-core" }),
+      svgEl("circle", { cx: "600", cy: "212", r: "24", class: "transform-ring" }),
+      svgEl("circle", { cx: "600", cy: "212", r: "34", class: "transform-ring" })
+    );
+
     const generator = makeAnim(svgEl("g", { id: "generator" }), 0);
     generator.append(
       svgEl("circle", { cx: "600", cy: "335", r: "62", class: "generator-ring" }),
@@ -289,7 +298,7 @@
       }
     });
 
-    svg.append(magneticField, circuitPath, currentParticles, electricField, loopDirection, lenzGroup, energyFlow, rodGroup, generator, skyline);
+    svg.append(magneticField, circuitPath, currentParticles, electricField, loopDirection, lenzGroup, energyFlow, energyConverter, rodGroup, generator, skyline);
 
     return {
       magneticField,
@@ -308,6 +317,7 @@
       loopDirection,
       lenzGroup,
       energyFlow,
+      energyConverter,
       generator,
       skyline,
       circuitLen: circuitPath.getTotalLength()
@@ -463,12 +473,13 @@
     reveal(scene.loopDirection, levels.direction ?? 0, 180);
     reveal(scene.lenzGroup, levels.lenz ?? 0, 170);
     reveal(scene.energyFlow, levels.energy ?? 0, 210);
+    reveal(scene.energyConverter, levels.converter ?? 0, 230);
     reveal(scene.generator, levels.generator ?? 0, 140);
     reveal(scene.skyline, levels.skyline ?? 0, 240);
   }
 
   function resetVisuals() {
-    setFocus({ magnetic: 0.2, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, generator: 0, skyline: 0 });
+    setFocus({ magnetic: 0.2, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, generator: 0, skyline: 0 });
     scene.circuitPath.classList.remove("drawn");
     scene.circuitPath.style.strokeDashoffset = "1300";
     scene.skyline.classList.remove("lights-on");
@@ -552,9 +563,10 @@
   }
 
   function pageEnergy() {
-    pageLenz();
-    setFocus({ magnetic: 0.24, rod: 0.55, electric: 0.2, circuit: 0.62, current: 0.9, direction: 0.9, lenz: 0.3, energy: 1, generator: 0.72, skyline: 0.18 });
-    state.currentSpeedTarget = 118;
+    setFocus({ magnetic: 0.12, rod: 0.05, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 1, converter: 1, generator: 0.88, skyline: 0.06 });
+    reveal(scene.rodGroup, 0, 0);
+    state.currentSpeedTarget = 0;
+    elements.presentation.dataset.emphasis = "energy";
   }
 
   function pageApplications() {
