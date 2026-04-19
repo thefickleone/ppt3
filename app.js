@@ -120,7 +120,7 @@
     { title: "Motion and Separation", subtitle: "v x B pushes charges apart", explanation: "Chapter 4: As the rod moves, electrons drift and clear polarity builds at opposite ends.", layout: "right", render: pageMotion },
     { title: "EMF Formation", subtitle: "Internal field appears", explanation: "Chapter 5: As the swept flux area grows, changing magnetic flux drives a measurable EMF.", layout: "right", render: pageEMF },
     { title: "Derivation", subtitle: "ε = Bℓv", explanation: "", layout: "center", render: pageDerivation },
-    { title: "Simulation View", subtitle: "Full setup before current", explanation: "Higher velocity increases rod speed, charge separation, and EMF intensity.", layout: "right", render: pageSimulation },
+    { title: "Simulation View", subtitle: "Full setup before current", explanation: "Higher velocity increases rod speed, charge separation, and EMF intensity.", layout: "right", render: pageCurrent },
     { title: "Current Flow", subtitle: "Closed loop conduction", explanation: "The EMF drives current through the circuit", layout: "center", render: pageCurrent },
     { title: "Lenz's Law", subtitle: "Opposition to change", explanation: "Chapter 9: Induced effects resist motion, slowing the rod unless extra work is supplied.", layout: "right", render: pageLenz },
     { title: "Energy Conversion", subtitle: "Mechanical to electrical", explanation: "Chapter 10: Energy arrows show mechanical input transformed into electrical output.", layout: "center", render: pageEnergy },
@@ -699,7 +699,7 @@
     elements.presentation.dataset.emphasis = "equation";
   }
 
-  function pageSimulation() {
+  function applySimulationViewState() {
     pageEMF();
     setElectricFieldArrow(true);
     setFocus({ magnetic: 0.34, rod: 0.92, rodField: 0.8, emfCore: 0.78, flux: 1, electric: 0.85, circuit: 0.78, direction: 0.55 });
@@ -708,7 +708,10 @@
   }
 
   function pageCurrent() {
-    pageSimulation();
+    applySimulationViewState();
+    if (state.page === 6) {
+      return;
+    }
     setFocus({ magnetic: 0.32, rod: 0.9, flux: 0.92, electric: 0.74, circuit: 1, current: 1, direction: 1 });
     scene.particles.forEach((particle) => {
       particle.setAttribute("r", String(GEOMETRY.currentDotActiveR));
