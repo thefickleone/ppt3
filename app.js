@@ -79,7 +79,7 @@
   const pages = [
     { title: "Motional EMF", subtitle: "How does motion become electricity?", explanation: "", layout: "center", render: pageIntro },
     { title: "Real-World Examples", subtitle: "Motion and electricity already surround us", explanation: "Generator, turbine, and dynamo are real systems using this same motional EMF principle.", layout: "center", render: pageExamples },
-    { title: "Rod Question", subtitle: "What if a conductor moves through B?", explanation: "What if the rod starts moving?", layout: "left", render: pageRodQuestion },
+    { title: "What happens if this rod starts moving?", subtitle: "", explanation: "", layout: "center", render: pageRodQuestion },
     { title: "Motion and Separation", subtitle: "v x B pushes charges apart", explanation: "Chapter 4: As the rod moves, electrons drift and clear polarity builds at opposite ends.", layout: "right", render: pageMotion },
     { title: "EMF Formation", subtitle: "Internal field appears", explanation: "Chapter 5: As the swept flux area grows, changing magnetic flux drives a measurable EMF.", layout: "right", render: pageEMF },
     { title: "Derivation", subtitle: "epsilon = B l v", explanation: "Chapter 6: Emphasize the relation between field strength, rod length, and speed.", layout: "left", render: pageDerivation },
@@ -590,8 +590,8 @@
     setFocus({ magnetic: 0.32, rod: 1 });
     state.rodBaseX = 440;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
-    reveal(scene.negCap, 0.35, 160);
-    reveal(scene.posCap, 0.35, 210);
+    scene.negCap.style.opacity = "0";
+    scene.posCap.style.opacity = "0";
     setElectronShift(0);
   }
 

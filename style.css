@@ -435,8 +435,26 @@ body {
   pointer-events: auto;
 }
 
+#presentation[data-page="2"] #storyPanel {
+  top: 24%;
+  width: min(980px, calc(100vw - 72px));
+  padding: 0;
+  border: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+#presentation[data-page="2"] #title {
+  font-size: clamp(2.3rem, 5.6vw, 4.9rem);
+  letter-spacing: 0.03em;
+  line-height: 1.12;
+}
+
+#presentation[data-page="2"] #subtitle,
 #presentation[data-page="2"] #explanation {
-  animation: rodQuestionTextIn 1500ms ease-in-out both;
+  display: none;
 }
 
 #presentation[data-emphasis="equation"] #explanation,
@@ -991,18 +1009,6 @@ body {
   }
 }
 
-@keyframes rodQuestionTextIn {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-    filter: blur(2px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
-}
 
 @keyframes emphasisGlow {
   0%,
