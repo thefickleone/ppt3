@@ -216,6 +216,10 @@ body {
   opacity: 0;
 }
 
+#presentation[data-page="2"] #explanation {
+  animation: rodQuestionTextIn 1500ms ease-in-out both;
+}
+
 #presentation[data-emphasis="equation"] #explanation,
 #presentation[data-emphasis="current"] #explanation,
 #presentation[data-emphasis="lenz"] #explanation {
@@ -566,6 +570,19 @@ body {
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes rodQuestionTextIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
   }
 }
 

@@ -51,7 +51,7 @@
     {
       title: "Rod Question",
       subtitle: "What if a conductor moves through B?",
-      explanation: "Chapter 3: Introduce the rod in isolation and ask what force acts on free charges.",
+      explanation: "What if the rod starts moving?",
       render: pageRodQuestion
     },
     {
@@ -387,11 +387,11 @@
 
   function pageRodQuestion() {
     setFocus({ magnetic: 0.32, rod: 1 });
-    state.rodBaseX = 430;
+    state.rodBaseX = 440;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
     reveal(scene.negCap, 0.35, 160);
     reveal(scene.posCap, 0.35, 210);
-    setElectronShift(4);
+    setElectronShift(0);
   }
 
   function pageMotion() {
