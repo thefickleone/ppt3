@@ -74,7 +74,7 @@
     {
       title: "EMF Formation",
       subtitle: "Internal field appears",
-      explanation: "Chapter 5: Separation creates an internal electric field that leads to a measurable EMF.",
+      explanation: "Chapter 5: As the swept flux area grows, changing magnetic flux drives a measurable EMF.",
       render: pageEMF
     },
     {
@@ -261,6 +261,19 @@
       0
     );
 
+    const fluxArea = makeAnim(
+      svgEl("rect", {
+        id: "fluxArea",
+        x: "440",
+        y: "332",
+        width: "0",
+        height: "153",
+        rx: "4",
+        class: "flux-area"
+      }),
+      0
+    );
+
     const currentParticles = makeAnim(svgEl("g", { id: "currentParticles" }), 0);
     const particles = [];
     for (let i = 0; i < 18; i += 1) {
@@ -334,7 +347,7 @@
       eddyLoops.children[eddyLoops.children.length - 2].style.animationDelay = `${idx * 120}ms`;
     });
 
-    svg.append(magneticField, circuitPath, currentParticles, electricField, loopDirection, lenzGroup, energyFlow, energyConverter, eddyLoops, rodGroup, generator, skyline);
+    svg.append(magneticField, fluxArea, circuitPath, currentParticles, electricField, loopDirection, lenzGroup, energyFlow, energyConverter, eddyLoops, rodGroup, generator, skyline);
 
     return {
       magneticField,
@@ -348,6 +361,7 @@
       velocityArrow,
       rodField,
       emfCore,
+      fluxArea,
       electricField,
       circuitPath,
       currentParticles,
@@ -438,6 +452,13 @@
     scene.circuitPath.style.strokeDashoffset = String(dashTotal * (1 - progress));
   }
 
+  function updateFluxArea(rodX, intensity) {
+    const width = Math.max(0, Math.min(420, rodX - 440));
+    scene.fluxArea.setAttribute("width", width.toFixed(2));
+    scene.fluxArea.style.opacity = String(0.16 + intensity * 0.74);
+    scene.fluxArea.style.fillOpacity = String(0.08 + intensity * 0.3);
+  }
+
   function setTranslate(node, x, y, rotate = 0, scale = 1) {
     node.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`;
   }
@@ -491,6 +512,7 @@
     scene.electricField.style.opacity = String(0.35 + v * 0.65);
     scene.rodField.style.opacity = String(0.3 + v * 0.7);
     scene.emfCore.style.opacity = String(0.28 + v * 0.72);
+    updateFluxArea(state.rodBaseX, 0.22 + separation * 0.78);
   }
 
   function setElectronShift(shift) {
@@ -512,6 +534,7 @@
     reveal(scene.velocityArrow, levels.velocity ?? 0, 290);
     reveal(scene.rodField, levels.rodField ?? 0, 150);
     reveal(scene.emfCore, levels.emfCore ?? 0, 220);
+    reveal(scene.fluxArea, levels.flux ?? 0, 170);
     reveal(scene.electricField, levels.electric ?? 0, 120);
     reveal(scene.circuitPath, levels.circuit ?? 0, 140);
     reveal(scene.currentParticles, levels.current ?? 0, 220);
@@ -525,7 +548,7 @@
   }
 
   function resetVisuals() {
-    setFocus({ magnetic: 0.2, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 0, generator: 0, skyline: 0 });
+    setFocus({ magnetic: 0.2, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, flux: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 0, generator: 0, skyline: 0 });
     scene.circuitPath.classList.remove("drawn");
     scene.circuitPath.style.strokeDashoffset = "1300";
     scene.skyline.classList.remove("lights-on");
@@ -537,6 +560,7 @@
     scene.capGlowPos.style.opacity = "0";
     scene.capGlowNeg.style.transform = "scale(1)";
     scene.capGlowPos.style.transform = "scale(1)";
+    updateFluxArea(440, 0);
     state.rodBaseX = 140;
     state.motionPhase = 0;
     state.simulationTravel = 0;
@@ -577,13 +601,15 @@
   }
 
   function pageMotion() {
-    setFocus({ magnetic: 0.46, rod: 1 });
+    setFocus({ magnetic: 0.46, rod: 1, flux: 1 });
     applyChargeSeparationPhase(state.motionPhase, true);
+    updateFluxArea(state.rodBaseX, state.motionPhase);
   }
 
   function pageEMF() {
     applyChargeSeparationPhase(1, true);
-    setFocus({ magnetic: 0.42, rod: 1, rodField: 1, emfCore: 1, electric: 1 });
+    setFocus({ magnetic: 0.42, rod: 1, rodField: 1, emfCore: 1, flux: 1, electric: 1 });
+    updateFluxArea(state.rodBaseX, 1);
     scene.capGlowNeg.style.opacity = "0.86";
     scene.capGlowPos.style.opacity = "0.86";
     scene.capGlowNeg.style.transform = "scale(1.2)";
@@ -593,20 +619,20 @@
 
   function pageDerivation() {
     pageEMF();
-    setFocus({ magnetic: 0.58, rod: 0.98, length: 1, velocity: 1, rodField: 1, emfCore: 1, electric: 1 });
+    setFocus({ magnetic: 0.58, rod: 0.98, length: 1, velocity: 1, rodField: 1, emfCore: 1, flux: 1, electric: 1 });
     elements.presentation.dataset.emphasis = "equation";
   }
 
   function pageSimulation() {
     pageEMF();
-    setFocus({ magnetic: 0.34, rod: 0.92, rodField: 0.8, emfCore: 0.78, electric: 0.85, circuit: 0.78, direction: 0.55 });
+    setFocus({ magnetic: 0.34, rod: 0.92, rodField: 0.8, emfCore: 0.78, flux: 1, electric: 0.85, circuit: 0.78, direction: 0.55 });
     setCircuitProgress(0.78);
     updateSimulationFromVelocity(0);
   }
 
   function pageCurrent() {
     pageSimulation();
-    setFocus({ magnetic: 0.32, rod: 0.9, electric: 0.74, circuit: 1, current: 1, direction: 1 });
+    setFocus({ magnetic: 0.32, rod: 0.9, flux: 0.92, electric: 0.74, circuit: 1, current: 1, direction: 1 });
     setCircuitProgress(1);
     state.currentSpeedTarget = 150;
     elements.presentation.dataset.emphasis = "current";
@@ -614,7 +640,7 @@
 
   function pageLenz() {
     pageCurrent();
-    setFocus({ magnetic: 0.42, rod: 0.95, electric: 0.72, circuit: 1, current: 1, direction: 1, lenz: 1 });
+    setFocus({ magnetic: 0.42, rod: 0.95, flux: 0.9, electric: 0.72, circuit: 1, current: 1, direction: 1, lenz: 1 });
     state.rodBaseX = 388;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
     state.currentSpeedTarget = 208;

@@ -681,6 +681,13 @@ body {
   opacity: 0.8;
 }
 
+.flux-area {
+  fill: rgba(89, 243, 255, 0.2);
+  stroke: rgba(145, 233, 255, 0.72);
+  stroke-width: 1.2;
+  opacity: 0;
+}
+
 #presentation[data-emphasis="equation"] .ef-arrow {
   animation: emphasisGlow 1100ms ease-in-out infinite;
   stroke-width: 2.4;
