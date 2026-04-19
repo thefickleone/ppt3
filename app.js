@@ -38,6 +38,8 @@
     simulationTravel: 0,
     eddyPosition: 560,
     eddyVelocity: 0,
+    eddyPulse: 0,
+    eddyPrevOverlap: 0,
     lenzPhase: 0,
     energyPhase: 0,
     overlayTimer: null,
@@ -118,7 +120,7 @@
     {
       title: "Eddy Currents",
       subtitle: "Induced loops in bulk conductors",
-      explanation: "Chapter 12: Changing magnetic fields induce circulating currents that dissipate energy as heat.",
+      explanation: "Eddy currents are induced mainly when the rod enters or exits the localized magnetic field region.",
       render: pageEddy
     }
   ];
@@ -186,6 +188,13 @@
         magneticField.append(svgEl("line", { x1: String(x + 6), y1: String(y - 6), x2: String(x - 6), y2: String(y + 6), class: "magnetic-cross" }));
       }
     }
+
+    const eddyFieldRegion = makeAnim(svgEl("g", { id: "eddyFieldRegion" }), 0);
+    eddyFieldRegion.append(
+      svgEl("rect", { x: "540", y: "288", width: "180", height: "230", rx: "10", class: "eddy-field-box" }),
+      svgEl("line", { x1: "540", y1: "288", x2: "540", y2: "518", class: "eddy-field-edge" }),
+      svgEl("line", { x1: "720", y1: "288", x2: "720", y2: "518", class: "eddy-field-edge" })
+    );
 
     const rodGroup = makeAnim(svgEl("g", { id: "rodGroup" }), 0);
     rodGroup.append(svgEl("rect", { x: "0", y: "0", width: "320", height: "24", rx: "12", class: "rod" }));
@@ -358,10 +367,11 @@
       eddyLoops.children[eddyLoops.children.length - 2].style.animationDelay = `${idx * 120}ms`;
     });
 
-    svg.append(magneticField, fluxArea, circuitPath, currentParticles, electricField, loopDirection, lenzGroup, energyFlow, energyConverter, eddyLoops, rodGroup, generator, skyline);
+    svg.append(magneticField, eddyFieldRegion, fluxArea, circuitPath, currentParticles, electricField, loopDirection, lenzGroup, energyFlow, energyConverter, eddyLoops, rodGroup, generator, skyline);
 
     return {
       magneticField,
+      eddyFieldRegion,
       rodGroup,
       capGlowNeg,
       capGlowPos,
@@ -471,6 +481,14 @@
     scene.fluxArea.style.fillOpacity = String(0.08 + intensity * 0.3);
   }
 
+  function getEddyOverlap(rodX) {
+    const rodLeft = rodX;
+    const rodRight = rodX + 320;
+    const fieldLeft = 540;
+    const fieldRight = 720;
+    return Math.max(0, Math.min(rodRight, fieldRight) - Math.max(rodLeft, fieldLeft));
+  }
+
   function setTranslate(node, x, y, rotate = 0, scale = 1) {
     node.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`;
   }
@@ -552,6 +570,7 @@
 
   function setFocus(levels) {
     reveal(scene.magneticField, levels.magnetic ?? 0.18, 0);
+    reveal(scene.eddyFieldRegion, levels.eddyField ?? 0, 120);
     reveal(scene.rodGroup, levels.rod ?? 0, 70);
     reveal(scene.rodLengthMarker, levels.length ?? 0, 220);
     reveal(scene.velocityArrow, levels.velocity ?? 0, 290);
@@ -571,7 +590,7 @@
   }
 
   function resetVisuals() {
-    setFocus({ magnetic: 0.2, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, flux: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 0, generator: 0, skyline: 0 });
+    setFocus({ magnetic: 0.2, eddyField: 0, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, flux: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 0, generator: 0, skyline: 0 });
     scene.circuitPath.classList.remove("drawn");
     scene.circuitPath.style.strokeDashoffset = "1300";
     scene.skyline.classList.remove("lights-on");
@@ -589,6 +608,8 @@
     state.simulationTravel = 0;
     state.eddyPosition = 560;
     state.eddyVelocity = 0;
+    state.eddyPulse = 0;
+    state.eddyPrevOverlap = 0;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
     setTranslate(scene.generator, 0, 0, state.generatorSpin);
     setElectronShift(0);
@@ -687,9 +708,11 @@
   }
 
   function pageEddy() {
-    setFocus({ magnetic: 0.62, rod: 1, electric: 0.18, circuit: 0.2, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 1, generator: 0, skyline: 0.04 });
-    state.eddyPosition = 560;
-    state.eddyVelocity = 180;
+    setFocus({ magnetic: 0.14, eddyField: 1, rod: 1, electric: 0.06, circuit: 0.1, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 0.2, generator: 0, skyline: 0.04 });
+    state.eddyPosition = 420;
+    state.eddyVelocity = 220;
+    state.eddyPulse = 0;
+    state.eddyPrevOverlap = getEddyOverlap(state.eddyPosition);
     state.currentSpeedTarget = 0;
     scene.circuitPath.style.opacity = "0.12";
     scene.skyline.classList.remove("lights-on");
@@ -762,13 +785,25 @@
     }
 
     if (state.page === 11) {
-      state.eddyVelocity = Math.max(12, state.eddyVelocity - dt * 65);
+      const overlap = getEddyOverlap(state.eddyPosition);
+      const entered = state.eddyPrevOverlap === 0 && overlap > 0;
+      const exited = state.eddyPrevOverlap > 0 && overlap === 0;
+      if (entered || exited) {
+        state.eddyPulse = 1;
+        state.eddyVelocity *= 0.72;
+      }
+      state.eddyPrevOverlap = overlap;
+
+      state.eddyPulse = Math.max(0, state.eddyPulse - dt * 1.25);
+      state.eddyVelocity = Math.max(18, state.eddyVelocity - dt * 16);
       state.eddyPosition += dt * state.eddyVelocity;
-      if (state.eddyPosition > 620) {
-        state.eddyPosition = 620;
+      if (state.eddyPosition > 780) {
+        state.eddyPosition = 780;
       }
       setTranslate(scene.rodGroup, state.eddyPosition, 320, 0);
-      scene.eddyLoops.style.opacity = String(Math.min(1, 0.35 + state.eddyVelocity / 220));
+      const eddyVis = (overlap > 0 ? 0.22 : 0.08) + state.eddyPulse * 0.78;
+      scene.eddyLoops.style.opacity = String(Math.min(1, eddyVis));
+      scene.eddyLoops.style.transform = `translate(0px, 0px) scale(${0.94 + state.eddyPulse * 0.2})`;
     }
 
     window.requestAnimationFrame(animateFrame);
