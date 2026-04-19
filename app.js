@@ -85,7 +85,7 @@
     { title: "EMF Formation", subtitle: "Internal field appears", explanation: "Chapter 5: As the swept flux area grows, changing magnetic flux drives a measurable EMF.", layout: "right", render: pageEMF },
     { title: "Derivation", subtitle: "ε = Bℓv", explanation: "", layout: "center", render: pageDerivation },
     { title: "Simulation View", subtitle: "Full setup before current", explanation: "Higher velocity increases rod speed, charge separation, and EMF intensity.", layout: "right", render: pageSimulation },
-    { title: "Current Flow", subtitle: "Closed loop conduction", explanation: "", layout: "left", render: pageCurrent },
+    { title: "Current Flow", subtitle: "Closed loop conduction", explanation: "The EMF drives current through the circuit", layout: "center", render: pageCurrent },
     { title: "Lenz's Law", subtitle: "Opposition to change", explanation: "Chapter 9: Induced effects resist motion, slowing the rod unless extra work is supplied.", layout: "right", render: pageLenz },
     { title: "Energy Conversion", subtitle: "Mechanical to electrical", explanation: "Chapter 10: Energy arrows show mechanical input transformed into electrical output.", layout: "center", render: pageEnergy },
     { title: "Applications", subtitle: "Generator to city power", explanation: "Chapter 11: Rotational induction scales to practical generation and city lighting.", layout: "left", render: pageApplications },
@@ -590,6 +590,9 @@
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
     scene.rodGroup.firstChild.style.filter = "none";
     setTranslate(scene.generator, 0, 0, state.generatorSpin, 1, 0.8);
+    scene.particles.forEach((particle) => {
+      particle.setAttribute("r", "4");
+    });
     setElectronShift(0);
     elements.title.classList.remove("intro-title");
     elements.subtitle.classList.remove("intro-subtitle");
@@ -661,8 +664,11 @@
   function pageCurrent() {
     pageSimulation();
     setFocus({ magnetic: 0.32, rod: 0.9, flux: 0.92, electric: 0.74, circuit: 1, current: 1, direction: 1 });
+    scene.particles.forEach((particle) => {
+      particle.setAttribute("r", "6");
+    });
     setCircuitProgress(1);
-    state.currentSpeedTarget = 150;
+    state.currentSpeedTarget = 190;
     elements.presentation.dataset.emphasis = "current";
   }
 
