@@ -480,7 +480,9 @@
 
   function setActiveApplicationCard(activeIndex) {
     elements.applicationCardNodes.forEach((card, index) => {
-      card.classList.toggle("active", index === activeIndex);
+      const active = index === activeIndex;
+      card.classList.toggle("active", active);
+      card.classList.toggle("expanded", active);
     });
   }
 
@@ -851,12 +853,6 @@
       scene.energyFlow.style.opacity = String(Math.max(0.28, shimmer));
     }
 
-    if (state.page === 10 && elements.applicationCardNodes.length > 0) {
-      state.applicationCycle += dt;
-      const activeIndex = Math.floor(state.applicationCycle / 2.2) % elements.applicationCardNodes.length;
-      setActiveApplicationCard(activeIndex);
-    }
-
     if (state.page === 11) {
       state.eddyPulse += dt * (state.reducedMotion ? 1.2 : 2.6);
       const pulse = state.reducedMotion ? 0.55 : 0.5 + 0.5 * Math.sin(state.eddyPulse);
@@ -885,6 +881,13 @@
   elements.presentation.addEventListener("pointerdown", () => {
     elements.presentation.focus({ preventScroll: true });
   }, { signal: controlsSignal });
+
+  elements.applicationCardNodes.forEach((card, index) => {
+    card.addEventListener("click", () => {
+      if (state.page !== 10) return;
+      setActiveApplicationCard(index);
+    }, { signal: controlsSignal });
+  });
 
   elements.presentation.addEventListener("pointermove", (event) => {
     const rect = elements.canvas.getBoundingClientRect();
