@@ -78,7 +78,7 @@
 
   const pages = [
     { title: "Motional EMF", subtitle: "How does motion become electricity?", explanation: "", layout: "center", render: pageIntro },
-    { title: "Real-World Examples", subtitle: "Motion and electricity already surround us", explanation: "Generator, turbine, and dynamo are real systems using this same motional EMF principle.", layout: "left", render: pageExamples },
+    { title: "Real-World Examples", subtitle: "Motion and electricity already surround us", explanation: "Generator, turbine, and dynamo are real systems using this same motional EMF principle.", layout: "center", render: pageExamples },
     { title: "Rod Question", subtitle: "What if a conductor moves through B?", explanation: "What if the rod starts moving?", layout: "left", render: pageRodQuestion },
     { title: "Motion and Separation", subtitle: "v x B pushes charges apart", explanation: "Chapter 4: As the rod moves, electrons drift and clear polarity builds at opposite ends.", layout: "right", render: pageMotion },
     { title: "EMF Formation", subtitle: "Internal field appears", explanation: "Chapter 5: As the swept flux area grows, changing magnetic flux drives a measurable EMF.", layout: "right", render: pageEMF },
@@ -583,10 +583,7 @@
   }
 
   function pageExamples() {
-    setFocus({ magnetic: 0.25, generator: 0.36, skyline: 0.2, energy: 0.24 });
-    state.currentSpeedTarget = 42;
-    setFocus({ magnetic: 0.22, rod: 0.28, rodField: 0, emfCore: 0, electric: 0, circuit: 0.38, current: 0.88, direction: 0.78, lenz: 0, energy: 1, converter: 0, eddy: 0, generator: 1, skyline: 1 });
-    setTranslate(scene.rodGroup, 574, 206, 0, 0.24);
+    state.currentSpeedTarget = 0;
   }
 
   function pageRodQuestion() {

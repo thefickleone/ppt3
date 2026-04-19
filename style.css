@@ -173,12 +173,12 @@ body {
 #examplesCards {
   position: absolute;
   left: 50%;
-  top: 54%;
+  top: 62%;
   transform: translate(-50%, -50%);
-  width: min(1040px, 90vw);
+  width: min(980px, 88vw);
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(12px, 2vw, 20px);
+  gap: clamp(14px, 2.2vw, 24px);
   opacity: 0;
   pointer-events: none;
 }
@@ -289,6 +289,10 @@ body {
 #presentation[data-page="1"] #examplesCards {
   opacity: 1;
   pointer-events: auto;
+}
+
+#presentation[data-page="1"] #storyPanel {
+  top: 24%;
 }
 
 #presentation[data-page="1"] .example-card {
