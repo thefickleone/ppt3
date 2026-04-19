@@ -606,10 +606,20 @@ body {
 }
 
 .direction-arrow {
-  stroke: rgba(125, 228, 255, 0.9);
-  stroke-width: 3;
+  stroke: rgba(170, 235, 255, 0.98);
+  stroke-width: 3.6;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(89, 243, 255, 0.65));
+  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.78));
+}
+
+#presentation[data-page="7"] #title,
+#presentation[data-page="7"] #subtitle,
+#presentation[data-page="7"] #explanation,
+#presentation[data-page="7"] #progress,
+#presentation[data-page="7"] #hint,
+#presentation[data-page="7"] #simulationControl {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .rod-length-marker {

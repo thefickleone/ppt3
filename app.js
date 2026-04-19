@@ -89,7 +89,7 @@
     {
       title: "Current Flow",
       subtitle: "Closed loop conduction",
-      explanation: "Chapter 8: Closing the loop drives visible charge flow with clear current direction.",
+      explanation: "",
       render: pageCurrent
     },
     {
@@ -238,7 +238,7 @@
     const circuitPath = makeAnim(
       svgEl("path", {
         id: "circuitPath",
-        d: "M440 332 L440 485 L860 485 L860 332 L760 332",
+        d: "M572 332 L440 332 L440 485 L860 485 L860 332 L892 332",
         class: "circuit"
       }),
       0
@@ -246,7 +246,7 @@
 
     const currentParticles = makeAnim(svgEl("g", { id: "currentParticles" }), 0);
     const particles = [];
-    for (let i = 0; i < 14; i += 1) {
+    for (let i = 0; i < 18; i += 1) {
       const particle = svgEl("circle", { r: "4", class: "current-dot" });
       currentParticles.append(particle);
       particles.push(particle);
@@ -257,10 +257,10 @@
 
     const loopDirection = makeAnim(svgEl("g", { id: "loopDirection" }), 0);
     loopDirection.append(
-      svgEl("line", { x1: "440", y1: "455", x2: "440", y2: "390", class: "direction-arrow", "marker-end": "url(#arrowHead)" }),
-      svgEl("line", { x1: "480", y1: "485", x2: "560", y2: "485", class: "direction-arrow", "marker-end": "url(#arrowHead)" }),
-      svgEl("line", { x1: "860", y1: "360", x2: "860", y2: "430", class: "direction-arrow", "marker-end": "url(#arrowHead)" }),
-      svgEl("line", { x1: "820", y1: "332", x2: "785", y2: "332", class: "direction-arrow", "marker-end": "url(#arrowHead)" })
+      svgEl("line", { x1: "440", y1: "470", x2: "440", y2: "398", class: "direction-arrow", "marker-end": "url(#arrowHead)" }),
+      svgEl("line", { x1: "500", y1: "485", x2: "620", y2: "485", class: "direction-arrow", "marker-end": "url(#arrowHead)" }),
+      svgEl("line", { x1: "860", y1: "368", x2: "860", y2: "446", class: "direction-arrow", "marker-end": "url(#arrowHead)" }),
+      svgEl("line", { x1: "810", y1: "332", x2: "730", y2: "332", class: "direction-arrow", "marker-end": "url(#arrowHead)" })
     );
 
     const energyFlow = makeAnim(svgEl("g", { id: "energyFlow" }), 0);
@@ -536,7 +536,7 @@
     pageSimulation();
     setFocus({ magnetic: 0.32, rod: 0.9, electric: 0.74, circuit: 1, current: 1, direction: 1 });
     setCircuitProgress(1);
-    state.currentSpeedTarget = 170;
+    state.currentSpeedTarget = 150;
     elements.presentation.dataset.emphasis = "current";
   }
 
