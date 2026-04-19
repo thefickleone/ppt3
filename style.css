@@ -828,6 +828,33 @@ body {
   transform-origin: center;
 }
 
+.eddy-loop {
+  fill: none;
+  stroke: rgba(129, 230, 255, 0.9);
+  stroke-width: 2.1;
+  stroke-dasharray: 7 6;
+  transform-origin: center;
+  animation: eddySpin 1400ms linear infinite;
+  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.55));
+}
+
+.eddy-core {
+  fill: rgba(182, 242, 255, 0.9);
+  opacity: 0.65;
+  animation: eddyCorePulse 900ms ease-in-out infinite;
+}
+
+#presentation[data-page="11"] .bg-gradient {
+  background:
+    radial-gradient(circle at 34% 28%, rgba(119, 221, 255, 0.14), transparent 48%),
+    radial-gradient(circle at 74% 62%, rgba(119, 182, 255, 0.1), transparent 46%),
+    linear-gradient(160deg, #07101d, #0a162a);
+}
+
+#presentation[data-page="11"] .rod {
+  filter: drop-shadow(0 0 10px rgba(89, 243, 255, 0.28));
+}
+
 #presentation[data-page="9"] .bg-gradient {
   background:
     radial-gradient(circle at 30% 26%, rgba(255, 157, 107, 0.12), transparent 44%),
@@ -993,6 +1020,23 @@ body {
   to { transform: rotate(360deg); }
 }
 
+@keyframes eddySpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes eddyCorePulse {
+  0%,
+  100% {
+    transform: scale(0.84);
+    opacity: 0.46;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.95;
+  }
+}
+
 @keyframes coreTransfer {
   0%,
   100% {
@@ -1096,6 +1140,8 @@ body {
   .emf-ring,
   .transform-core,
   .transform-ring,
+  .eddy-loop,
+  .eddy-core,
   .mech-arrow,
   .elec-arrow {
     transition-duration: 0.01ms !important;

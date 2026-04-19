@@ -34,6 +34,8 @@
     motionPhase: 0,
     simulationVelocity: 0.55,
     simulationTravel: 0,
+    eddyPosition: 560,
+    eddyVelocity: 0,
     lenzPhase: 0,
     energyPhase: 0,
     overlayTimer: null,
@@ -299,7 +301,20 @@
       }
     });
 
-    svg.append(magneticField, circuitPath, currentParticles, electricField, loopDirection, lenzGroup, energyFlow, energyConverter, rodGroup, generator, skyline);
+    const eddyLoops = makeAnim(svgEl("g", { id: "eddyLoops" }), 0);
+    const eddyCenters = [
+      [520, 348], [600, 336], [690, 352], [570, 414], [660, 410]
+    ];
+    eddyCenters.forEach(([cx, cy], idx) => {
+      eddyLoops.append(
+        svgEl("circle", { cx: String(cx), cy: String(cy), r: "24", class: "eddy-loop" }),
+        svgEl("circle", { cx: String(cx), cy: String(cy), r: "12", class: "eddy-core" })
+      );
+      eddyLoops.lastChild.style.animationDelay = `${idx * 120}ms`;
+      eddyLoops.children[eddyLoops.children.length - 2].style.animationDelay = `${idx * 120}ms`;
+    });
+
+    svg.append(magneticField, circuitPath, currentParticles, electricField, loopDirection, lenzGroup, energyFlow, energyConverter, eddyLoops, rodGroup, generator, skyline);
 
     return {
       magneticField,
@@ -319,6 +334,7 @@
       lenzGroup,
       energyFlow,
       energyConverter,
+      eddyLoops,
       generator,
       skyline,
       circuitLen: circuitPath.getTotalLength()
@@ -481,12 +497,13 @@
     reveal(scene.lenzGroup, levels.lenz ?? 0, 170);
     reveal(scene.energyFlow, levels.energy ?? 0, 210);
     reveal(scene.energyConverter, levels.converter ?? 0, 230);
+    reveal(scene.eddyLoops, levels.eddy ?? 0, 190);
     reveal(scene.generator, levels.generator ?? 0, 140);
     reveal(scene.skyline, levels.skyline ?? 0, 240);
   }
 
   function resetVisuals() {
-    setFocus({ magnetic: 0.2, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, generator: 0, skyline: 0 });
+    setFocus({ magnetic: 0.2, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 0, generator: 0, skyline: 0 });
     scene.circuitPath.classList.remove("drawn");
     scene.circuitPath.style.strokeDashoffset = "1300";
     scene.skyline.classList.remove("lights-on");
@@ -498,6 +515,8 @@
     state.rodBaseX = 140;
     state.motionPhase = 0;
     state.simulationTravel = 0;
+    state.eddyPosition = 560;
+    state.eddyVelocity = 0;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
     setTranslate(scene.generator, 0, 0, state.generatorSpin);
     setElectronShift(0);
@@ -585,10 +604,13 @@
   }
 
   function pageEddy() {
-    setFocus({ magnetic: 0.56, rod: 0, electric: 0.2, circuit: 0.9, current: 1, direction: 1, lenz: 0.6, energy: 0.26, generator: 0.28, skyline: 0.12 });
-    setCircuitProgress(1);
-    state.currentSpeedTarget = 118;
+    setFocus({ magnetic: 0.62, rod: 1, electric: 0.18, circuit: 0.2, current: 0, direction: 0, lenz: 0, energy: 0, converter: 0, eddy: 1, generator: 0, skyline: 0.04 });
+    state.eddyPosition = 560;
+    state.eddyVelocity = 180;
+    state.currentSpeedTarget = 0;
+    scene.circuitPath.style.opacity = "0.12";
     scene.skyline.classList.remove("lights-on");
+    elements.presentation.dataset.emphasis = "eddy";
   }
 
   function renderPage() {
@@ -646,6 +668,16 @@
       state.energyPhase += dt * 4;
       const shimmer = 0.6 + 0.4 * Math.sin(state.energyPhase * Math.PI);
       scene.energyFlow.style.opacity = String(Math.max(0.28, shimmer));
+    }
+
+    if (state.page === 11) {
+      state.eddyVelocity = Math.max(12, state.eddyVelocity - dt * 65);
+      state.eddyPosition += dt * state.eddyVelocity;
+      if (state.eddyPosition > 620) {
+        state.eddyPosition = 620;
+      }
+      setTranslate(scene.rodGroup, state.eddyPosition, 320, 0);
+      scene.eddyLoops.style.opacity = String(Math.min(1, 0.35 + state.eddyVelocity / 220));
     }
 
     window.requestAnimationFrame(animateFrame);
