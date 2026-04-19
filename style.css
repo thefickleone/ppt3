@@ -157,6 +157,80 @@ body {
   pointer-events: none;
 }
 
+#derivationPanel {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  width: min(900px, 84vw);
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(112, 182, 255, 0.28);
+  background: rgba(3, 9, 22, 0.62);
+  backdrop-filter: blur(7px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#equationBuild {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.42rem;
+  font-size: clamp(2rem, 5vw, 4.1rem);
+  letter-spacing: 0.03em;
+}
+
+#equationBuild .term,
+#equationBuild .operator {
+  opacity: 0;
+  transform: translateY(8px) scale(0.92);
+}
+
+#equationLegend {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  font-size: clamp(0.78rem, 1.35vw, 0.95rem);
+  color: rgba(203, 222, 247, 0.88);
+}
+
+#presentation[data-page="5"] #derivationPanel {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#presentation[data-page="5"] #equationBuild .term,
+#presentation[data-page="5"] #equationBuild .operator {
+  animation: derivationTermIn 680ms ease-out forwards;
+}
+
+#presentation[data-page="5"] #equationBuild .term-epsilon { animation-delay: 100ms; }
+#presentation[data-page="5"] #equationBuild .operator { animation-delay: 280ms; }
+#presentation[data-page="5"] #equationBuild .term-b { animation-delay: 460ms; }
+#presentation[data-page="5"] #equationBuild .term-l { animation-delay: 660ms; }
+#presentation[data-page="5"] #equationBuild .term-v { animation-delay: 860ms; }
+
+#presentation[data-page="5"] #equationBuild .term-b,
+#presentation[data-page="5"] .legend-b {
+  color: #8de9ff;
+  text-shadow: 0 0 12px rgba(89, 243, 255, 0.45);
+}
+
+#presentation[data-page="5"] #equationBuild .term-l,
+#presentation[data-page="5"] .legend-l {
+  color: #ffc78c;
+  text-shadow: 0 0 10px rgba(255, 179, 112, 0.32);
+}
+
+#presentation[data-page="5"] #equationBuild .term-v,
+#presentation[data-page="5"] .legend-v {
+  color: #b1d5ff;
+  text-shadow: 0 0 10px rgba(147, 195, 255, 0.3);
+}
+
 .example-card {
   margin: 0;
   overflow: hidden;
@@ -504,6 +578,20 @@ body {
   filter: drop-shadow(0 0 6px rgba(89, 243, 255, 0.65));
 }
 
+.rod-length-marker {
+  stroke: rgba(255, 196, 132, 0.95);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(255, 166, 95, 0.55));
+}
+
+.velocity-arrow {
+  stroke: rgba(176, 214, 255, 0.95);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(168, 215, 255, 0.62));
+}
+
 .lenz-arrow {
   stroke: #8ad8ff;
   stroke-width: 5;
@@ -650,6 +738,17 @@ body {
   }
 }
 
+@keyframes derivationTermIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes emfFieldGrow {
   0%,
   100% {
@@ -695,12 +794,15 @@ body {
   #title,
   #subtitle,
   #explanation,
+  #derivationPanel,
   .example-card,
   .circuit,
   .window,
   .ef-arrow,
   .current-dot,
   .lenz-arrow,
+  .velocity-arrow,
+  .rod-length-marker,
   .rod-field-arrow,
   .emf-core,
   .emf-ring {

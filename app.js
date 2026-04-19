@@ -183,6 +183,27 @@
     }
     rodGroup.append(electrons);
 
+    const rodLengthMarker = makeAnim(svgEl("line", {
+      x1: "0",
+      y1: "-12",
+      x2: "320",
+      y2: "-12",
+      class: "rod-length-marker",
+      "marker-start": "url(#arrowHead)",
+      "marker-end": "url(#arrowHead)"
+    }), 0);
+    rodGroup.append(rodLengthMarker);
+
+    const velocityArrow = makeAnim(svgEl("line", {
+      x1: "338",
+      y1: "12",
+      x2: "412",
+      y2: "12",
+      class: "velocity-arrow",
+      "marker-end": "url(#arrowHead)"
+    }), 0);
+    rodGroup.append(velocityArrow);
+
     const rodField = makeAnim(svgEl("g", { id: "rodField" }), 0);
     for (let i = 0; i < 4; i += 1) {
       const x = 62 + i * 62;
@@ -269,6 +290,8 @@
       negCap,
       posCap,
       electronNodes,
+      rodLengthMarker,
+      velocityArrow,
       rodField,
       emfCore,
       electricField,
@@ -392,6 +415,8 @@
   function setFocus(levels) {
     reveal(scene.magneticField, levels.magnetic ?? 0.18, 0);
     reveal(scene.rodGroup, levels.rod ?? 0, 70);
+    reveal(scene.rodLengthMarker, levels.length ?? 0, 220);
+    reveal(scene.velocityArrow, levels.velocity ?? 0, 290);
     reveal(scene.rodField, levels.rodField ?? 0, 150);
     reveal(scene.emfCore, levels.emfCore ?? 0, 220);
     reveal(scene.electricField, levels.electric ?? 0, 120);
@@ -405,7 +430,7 @@
   }
 
   function resetVisuals() {
-    setFocus({ magnetic: 0.2, rod: 0, rodField: 0, emfCore: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, generator: 0, skyline: 0 });
+    setFocus({ magnetic: 0.2, rod: 0, length: 0, velocity: 0, rodField: 0, emfCore: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, generator: 0, skyline: 0 });
     scene.circuitPath.classList.remove("drawn");
     scene.circuitPath.style.strokeDashoffset = "1300";
     scene.skyline.classList.remove("lights-on");
@@ -457,7 +482,7 @@
 
   function pageDerivation() {
     pageEMF();
-    setFocus({ magnetic: 0.36, rod: 0.92, electric: 1 });
+    setFocus({ magnetic: 0.58, rod: 0.98, length: 1, velocity: 1, rodField: 1, emfCore: 1, electric: 1 });
     elements.presentation.dataset.emphasis = "equation";
   }
 
