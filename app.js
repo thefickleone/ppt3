@@ -12,12 +12,13 @@
     stepValue: document.getElementById("stepValue"),
     explanation: document.getElementById("explanation"),
     velocitySlider: document.getElementById("velocitySlider"),
-    velocityValue: document.getElementById("velocityValue")
+    velocityValue: document.getElementById("velocityValue"),
+    applicationCards: Array.from(document.querySelectorAll("#applicationCards .app-card"))
   };
 
   if (
     !elements.presentation || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
-    !elements.velocitySlider || !elements.velocityValue
+    !elements.velocitySlider || !elements.velocityValue || elements.applicationCards.length === 0
   ) {
     return;
   }
@@ -389,6 +390,12 @@
     }
   }
 
+  function setActiveApplicationCard(card) {
+    elements.applicationCards.forEach((item) => {
+      item.classList.toggle("active", item === card);
+    });
+  }
+
   function setCircuitProgress(progress) {
     const dashTotal = 1300;
     scene.circuitPath.style.opacity = String(0.2 + progress * 0.8);
@@ -674,6 +681,18 @@
       updateSimulationFromVelocity(0);
     }
   });
+
+  elements.applicationCards.forEach((card) => {
+    card.addEventListener("click", () => setActiveApplicationCard(card));
+    card.addEventListener("keydown", (event) => {
+      if (event.code === "Enter" || event.code === "Space") {
+        event.preventDefault();
+        setActiveApplicationCard(card);
+      }
+    });
+  });
+
+  setActiveApplicationCard(elements.applicationCards[0]);
 
   updateSimulationUI();
 

@@ -290,6 +290,133 @@ body {
   opacity: 0;
 }
 
+#applicationCards {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  width: min(1020px, 88vw);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.8vw, 18px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.app-card {
+  border: 1px solid rgba(122, 189, 255, 0.24);
+  border-radius: 14px;
+  background: rgba(5, 10, 24, 0.62);
+  min-height: 150px;
+  padding: 0.9rem;
+  transition: transform 360ms var(--ease-ui), box-shadow 360ms ease, border-color 360ms ease, background 360ms ease;
+  cursor: pointer;
+  outline: none;
+}
+
+.app-card h3 {
+  margin: 0;
+  font-size: clamp(1rem, 1.7vw, 1.2rem);
+  letter-spacing: 0.05em;
+  color: rgba(230, 241, 255, 0.94);
+}
+
+.app-anim {
+  position: relative;
+  margin-top: 0.75rem;
+  height: 86px;
+  display: grid;
+  place-items: center;
+  opacity: 0.25;
+  transform: scale(0.9);
+  transition: opacity 320ms ease, transform 320ms ease;
+}
+
+.app-card.active {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(122, 234, 255, 0.58);
+  box-shadow: 0 0 18px rgba(89, 243, 255, 0.22), 0 12px 26px rgba(0, 0, 0, 0.36);
+  background: rgba(8, 20, 42, 0.74);
+}
+
+.app-card.active .app-anim {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.app-card .ring {
+  position: absolute;
+  border-radius: 999px;
+  border: 2px solid rgba(137, 232, 255, 0.78);
+  width: 26px;
+  height: 26px;
+  opacity: 0;
+}
+
+.app-card.active[data-app="generator"] .ring {
+  animation: appRing 1100ms ease-out infinite;
+}
+
+.app-card.active[data-app="generator"] .ring:nth-child(2) {
+  animation-delay: 420ms;
+}
+
+.app-card .core {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(198, 247, 255, 0.94);
+  filter: drop-shadow(0 0 8px rgba(89, 243, 255, 0.8));
+}
+
+.app-card .bar {
+  position: absolute;
+  width: 10px;
+  height: 34px;
+  border-radius: 6px;
+  background: rgba(127, 216, 255, 0.82);
+  box-shadow: 0 0 7px rgba(89, 243, 255, 0.55);
+  opacity: 0.45;
+}
+
+.app-card .bar:nth-child(1) { transform: translateX(-16px); }
+.app-card .bar:nth-child(2) { transform: translateX(0px); }
+.app-card .bar:nth-child(3) { transform: translateX(16px); }
+
+.app-card.active[data-app="dynamo"] .bar {
+  animation: appBars 900ms ease-in-out infinite;
+}
+
+.app-card.active[data-app="dynamo"] .bar:nth-child(2) { animation-delay: 120ms; }
+.app-card.active[data-app="dynamo"] .bar:nth-child(3) { animation-delay: 240ms; }
+
+.app-card .blade {
+  position: absolute;
+  width: 42px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(183, 230, 255, 0.9);
+  transform-origin: center;
+  box-shadow: 0 0 7px rgba(163, 222, 255, 0.5);
+}
+
+.app-card .blade:nth-child(1) { transform: rotate(0deg); }
+.app-card .blade:nth-child(2) { transform: rotate(60deg); }
+.app-card .blade:nth-child(3) { transform: rotate(120deg); }
+
+.app-card.active[data-app="turbine"] .app-anim {
+  animation: appSpin 1200ms linear infinite;
+}
+
+#presentation[data-page="10"] #applicationCards {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#presentation[data-page="10"] #explanation {
+  opacity: 0;
+}
+
 #presentation[data-page="2"] #explanation {
   animation: rodQuestionTextIn 1500ms ease-in-out both;
 }
@@ -850,6 +977,22 @@ body {
   }
 }
 
+@keyframes appRing {
+  0% { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes appBars {
+  0%,
+  100% { transform: translateY(6px) scaleY(0.8); opacity: 0.5; }
+  50% { transform: translateY(-6px) scaleY(1.12); opacity: 1; }
+}
+
+@keyframes appSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @keyframes coreTransfer {
   0%,
   100% {
@@ -940,6 +1083,7 @@ body {
   #explanation,
   #derivationPanel,
   .example-card,
+  .app-card,
   .circuit,
   .window,
   .ef-arrow,
