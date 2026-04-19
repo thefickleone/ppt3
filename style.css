@@ -31,6 +31,18 @@ body {
   height: 100%;
   overflow: hidden;
   isolation: isolate;
+  display: grid;
+  place-items: center;
+}
+
+.presentation-canvas {
+  position: relative;
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  aspect-ratio: 16 / 9;
+  max-width: 100vw;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 #presentation::after {
@@ -85,9 +97,9 @@ body {
   z-index: 2;
   position: absolute;
   top: 50%;
-  left: 50%;
-  width: min(640px, calc(100vw - 64px));
-  transform: translate(-50%, -50%);
+  left: 5%;
+  width: 25%;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   gap: clamp(0.45rem, 1.1vw, 0.8rem);
@@ -150,24 +162,32 @@ body {
 
 #presentation[data-layout="center"] #storyPanel {
   left: 50%;
+  width: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
   align-items: center;
 }
 
 #presentation[data-layout="left"] #storyPanel {
-  left: clamp(26px, 5vw, 84px);
-  transform: translate(0, -50%);
+  left: 5%;
+  width: 25%;
+  transform: translateY(-50%);
   text-align: left;
   align-items: flex-start;
 }
 
 #presentation[data-layout="right"] #storyPanel {
   left: auto;
-  right: clamp(26px, 5vw, 84px);
-  transform: translate(0, -50%);
+  right: 5%;
+  width: 25%;
+  transform: translateY(-50%);
   text-align: left;
   align-items: flex-start;
+}
+
+.js-driven {
+  transition: none !important;
+  will-change: transform, opacity;
 }
 
 #examplesCards {
@@ -437,7 +457,7 @@ body {
 
 #presentation[data-page="2"] #storyPanel {
   top: 24%;
-  width: min(980px, calc(100vw - 72px));
+  width: 50%;
   padding: 0;
   border: none;
   background: transparent;
@@ -506,7 +526,7 @@ body {
 
 #presentation[data-page="0"] #storyPanel {
   gap: 0.2rem;
-  width: min(920px, calc(100vw - 80px));
+  width: 50%;
   padding: 0;
   border-color: transparent;
   background: transparent;
@@ -546,7 +566,7 @@ body {
 
 #presentation[data-page="5"] #storyPanel {
   top: 50%;
-  width: min(860px, calc(100vw - 72px));
+  width: 50%;
   padding: 0;
   border: none;
   background: transparent;
@@ -674,6 +694,11 @@ body {
   fill: url(#rodGradient);
   stroke: rgba(255, 255, 255, 0.35);
   stroke-width: 1;
+}
+
+.rod-glow {
+  fill: rgba(132, 236, 255, 0.28);
+  opacity: 0;
 }
 
 .rod-cap-glow {
@@ -838,7 +863,7 @@ body {
 
 #presentation[data-page="7"] #storyPanel {
   top: 80%;
-  width: min(840px, calc(100vw - 72px));
+  width: 50%;
   padding: 0;
   border: none;
   background: transparent;

@@ -28,6 +28,7 @@
 
   const elements = {
     presentation: document.getElementById("presentation"),
+    canvas: document.querySelector(".presentation-canvas"),
     scene: document.getElementById("scene"),
     storyPanel: document.getElementById("storyPanel"),
     svg: document.getElementById("sceneSvg"),
@@ -35,13 +36,17 @@
     bgGradient: document.querySelector("#background .bg-gradient"),
     title: document.getElementById("title"),
     subtitle: document.getElementById("subtitle"),
+    derivationPanel: document.getElementById("derivationPanel"),
+    equationBuild: document.getElementById("equationBuild"),
+    applicationCards: document.getElementById("applicationCards"),
+    applicationCardNodes: Array.from(document.querySelectorAll("#applicationCards .app-card")),
     stepValue: document.getElementById("stepValue"),
     explanation: document.getElementById("explanation")
   };
 
   if (
-    !elements.presentation || !elements.scene || !elements.storyPanel || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
-    !elements.bgGrid || !elements.bgGradient
+    !elements.presentation || !elements.canvas || !elements.scene || !elements.storyPanel || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
+    !elements.bgGrid || !elements.bgGradient || !elements.derivationPanel || !elements.equationBuild || !elements.applicationCards
   ) {
     return;
   }
@@ -63,6 +68,7 @@
     eddyPulse: 0,
     lenzPhase: 0,
     energyPhase: 0,
+    applicationCycle: 0,
     overlayTimer: null,
     transitionTimer: null,
     isTransitioning: false,
@@ -74,6 +80,9 @@
     lastTs: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
   };
+
+  const controlsAbortController = new AbortController();
+  const controlsSignal = controlsAbortController.signal;
 
   const scene = initScene(elements.svg);
 
@@ -100,6 +109,7 @@
 
   function makeAnim(node, opacity = 0) {
     node.classList.add("anim");
+    node.classList.add("js-driven");
     node.style.opacity = String(opacity);
     return node;
   }
@@ -164,6 +174,8 @@
     );
 
     const rodGroup = makeAnim(svgEl("g", { id: "rodGroup" }), 0);
+    const rodGlow = makeAnim(svgEl("rect", { x: "-8", y: "-8", width: "336", height: "40", rx: "16", class: "rod-glow" }), 0);
+    rodGroup.append(rodGlow);
     rodGroup.append(svgEl("rect", { x: "0", y: "0", width: "320", height: "24", rx: "12", class: "rod" }));
     const capGlowNeg = svgEl("circle", { cx: "12", cy: "12", r: "30", class: "rod-cap-glow cap-glow-negative" });
     const capGlowPos = svgEl("circle", { cx: "308", cy: "12", r: "30", class: "rod-cap-glow cap-glow-positive" });
@@ -340,6 +352,7 @@
       magneticField,
       eddyFieldRegion,
       rodGroup,
+      rodGlow,
       capGlowNeg,
       capGlowPos,
       negCap,
@@ -420,6 +433,7 @@
       if (state.page === 6) {
         state.simulationTravel = 0;
       }
+      state.lastTs = 0;
       const noSvgPages = [1, 5, 10, 11];
       elements.scene.style.opacity = noSvgPages.includes(state.page) ? "0" : "1";
       updateProgressUI();
@@ -461,6 +475,12 @@
     const marker = enabled ? "url(#arrowHead)" : "none";
     Array.from(scene.electricField.children).forEach((line) => {
       line.setAttribute("marker-end", marker);
+    });
+  }
+
+  function setActiveApplicationCard(activeIndex) {
+    elements.applicationCardNodes.forEach((card, index) => {
+      card.classList.toggle("active", index === activeIndex);
     });
   }
 
@@ -575,6 +595,7 @@
     scene.capGlowPos.style.opacity = "0";
     scene.capGlowNeg.style.transform = "scale(1)";
     scene.capGlowPos.style.transform = "scale(1)";
+    scene.rodGlow.style.opacity = "0";
     Array.from(scene.electricField.children).forEach((line, idx) => {
       const baseY = 278 + idx * 20;
       line.setAttribute("y1", String(baseY));
@@ -588,12 +609,14 @@
     state.eddyPosition = 560;
     state.eddyPulse = 0;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0, 1, 1.05);
-    scene.rodGroup.firstChild.style.filter = "none";
+    scene.rodGlow.style.opacity = "0";
     setTranslate(scene.generator, 0, 0, state.generatorSpin, 1, 0.8);
     scene.particles.forEach((particle) => {
       particle.setAttribute("r", "4");
     });
     setElectronShift(0);
+    setActiveApplicationCard(-1);
+    state.applicationCycle = 0;
     elements.title.classList.remove("intro-title");
     elements.subtitle.classList.remove("intro-subtitle");
   }
@@ -695,6 +718,8 @@
     reveal(scene.rodGroup, 0, 120);
     scene.skyline.classList.add("lights-on");
     state.currentSpeedTarget = 155;
+    state.applicationCycle = 0;
+    setActiveApplicationCard(0);
   }
 
   function pageEddy() {
@@ -796,7 +821,7 @@
       scene.capGlowPos.style.transform = `scale(${endScale})`;
 
       const rodEnergy = 0.18 + emfP * (0.28 + pulse * 0.28);
-      scene.rodGroup.firstChild.style.filter = `drop-shadow(0 0 ${8 + emfP * 10}px rgba(132, 236, 255, ${rodEnergy.toFixed(3)}))`;
+      scene.rodGlow.style.opacity = String(Math.min(0.85, rodEnergy));
       scene.emfCore.style.opacity = String(0.2 + emfP * 0.8);
       scene.emfCore.style.transform = `scale(${0.92 + emfP * (0.12 + pulse * 0.08)})`;
 
@@ -826,6 +851,12 @@
       scene.energyFlow.style.opacity = String(Math.max(0.28, shimmer));
     }
 
+    if (state.page === 10 && elements.applicationCardNodes.length > 0) {
+      state.applicationCycle += dt;
+      const activeIndex = Math.floor(state.applicationCycle / 2.2) % elements.applicationCardNodes.length;
+      setActiveApplicationCard(activeIndex);
+    }
+
     if (state.page === 11) {
       state.eddyPulse += dt * (state.reducedMotion ? 1.2 : 2.6);
       const pulse = state.reducedMotion ? 0.55 : 0.5 + 0.5 * Math.sin(state.eddyPulse);
@@ -851,15 +882,19 @@
     window.requestAnimationFrame(animateFrame);
   }
 
-  window.addEventListener("pointermove", (event) => {
-    const rect = elements.presentation.getBoundingClientRect();
+  elements.presentation.addEventListener("pointerdown", () => {
+    elements.presentation.focus({ preventScroll: true });
+  }, { signal: controlsSignal });
+
+  elements.presentation.addEventListener("pointermove", (event) => {
+    const rect = elements.canvas.getBoundingClientRect();
     const nx = (event.clientX - rect.left) / rect.width - 0.5;
     const ny = (event.clientY - rect.top) / rect.height - 0.5;
     state.parallaxTargetX = nx * 14;
     state.parallaxTargetY = ny * 10;
-  });
+  }, { signal: controlsSignal });
 
-  window.addEventListener("keydown", (event) => {
+  elements.presentation.addEventListener("keydown", (event) => {
     if (event.repeat) return;
     const now = performance.now();
     if (now < state.inputCooldownUntil) return;
@@ -880,7 +915,11 @@
       state.inputCooldownUntil = now + CONFIG.timing.reloadCooldownMs;
       window.location.reload();
     }
-  });
+  }, { signal: controlsSignal });
+
+  window.addEventListener("beforeunload", () => controlsAbortController.abort(), { once: true });
+
+  elements.presentation.focus({ preventScroll: true });
 
 
   setPage(0, true);

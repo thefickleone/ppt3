@@ -7,50 +7,96 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main id="presentation" aria-label="Motional EMF cinematic scene">
-      <div id="background" class="layer" aria-hidden="true">
-        <div class="bg-gradient"></div>
-        <div class="bg-grid"></div>
-      </div>
-
-      <section id="scene" class="layer" aria-label="Physics scene">
-        <svg
-          id="sceneSvg"
-          viewBox="0 0 1200 675"
-          preserveAspectRatio="xMidYMid slice"
-          role="img"
-          aria-label="Motional EMF visual scene canvas"
-        ></svg>
-      </section>
-
-      <div id="storyPanel" class="layer">
-        <h1 id="title">Motional EMF</h1>
-        <p id="subtitle">How does motion become electricity?</p>
-        <div id="explanation">A conductor moving through a magnetic field separates charge and creates voltage.</div>
-      </div>
-
-      <section id="examplesCards" class="layer" aria-label="Real-world motional EMF systems">
-        <article class="example-card">
-          <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=900&q=80" alt="Electric generator rotor assembly" />
-          <h3>Generator</h3>
-        </article>
-        <article class="example-card">
-          <img src="https://images.unsplash.com/photo-1467533003447-e295ff1b0435?auto=format&fit=crop&w=900&q=80" alt="Wind turbine producing electrical power" />
-          <h3>Turbine</h3>
-        </article>
-        <article class="example-card">
-          <img src="https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=900&q=80" alt="Bicycle dynamo and wheel system" />
-          <h3>Dynamo</h3>
-        </article>
-      </section>
-
-      <aside id="ui" class="layer" aria-label="Presentation controls and progress">
-        <div id="progress">
-          <span class="label">Step</span>
-          <span id="stepValue">0 / 11</span>
+    <main id="presentation" tabindex="0" aria-label="Motional EMF cinematic scene">
+      <div class="presentation-canvas">
+        <div id="background" class="layer" aria-hidden="true">
+          <div class="bg-gradient"></div>
+          <div class="bg-grid"></div>
         </div>
-        <div id="hint">Right Arrow / Space: Next page &middot; Left Arrow: Previous page &middot; R: Reload</div>
-      </aside>
+
+        <section id="scene" class="layer" aria-label="Physics scene">
+          <svg
+            id="sceneSvg"
+            viewBox="0 0 1200 675"
+            preserveAspectRatio="xMidYMid slice"
+            role="img"
+            aria-label="Motional EMF visual scene canvas"
+          ></svg>
+        </section>
+
+        <div id="storyPanel" class="layer">
+          <h1 id="title">Motional EMF</h1>
+          <p id="subtitle">How does motion become electricity?</p>
+          <div id="explanation">A conductor moving through a magnetic field separates charge and creates voltage.</div>
+        </div>
+
+        <section id="examplesCards" class="layer" aria-label="Real-world motional EMF systems">
+          <article class="example-card">
+            <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=900&q=80" alt="Electric generator rotor assembly" />
+            <h3>Generator</h3>
+          </article>
+          <article class="example-card">
+            <img src="https://images.unsplash.com/photo-1467533003447-e295ff1b0435?auto=format&fit=crop&w=900&q=80" alt="Wind turbine producing electrical power" />
+            <h3>Turbine</h3>
+          </article>
+          <article class="example-card">
+            <img src="https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=900&q=80" alt="Bicycle dynamo and wheel system" />
+            <h3>Dynamo</h3>
+          </article>
+        </section>
+
+        <section id="derivationPanel" class="layer" aria-label="Motional EMF derivation">
+          <div id="equationBuild" aria-hidden="true">
+            <span class="term term-epsilon">ε</span>
+            <span class="operator">=</span>
+            <span class="term term-b">B</span>
+            <span class="term term-l">ℓ</span>
+            <span class="term term-v">v</span>
+          </div>
+          <div id="equationLegend" aria-label="Term meanings">
+            <span class="legend-b">B = magnetic field</span>
+            <span class="legend-l">ℓ = rod length</span>
+            <span class="legend-v">v = velocity</span>
+          </div>
+        </section>
+
+        <section id="applicationCards" class="layer" aria-label="Motional EMF applications">
+          <article class="app-card" data-app="generator">
+            <h3>Generator</h3>
+            <div class="app-anim" aria-hidden="true">
+              <span class="ring"></span>
+              <span class="ring"></span>
+              <span class="core"></span>
+            </div>
+          </article>
+          <article class="app-card" data-app="turbine">
+            <h3>Turbine</h3>
+            <div class="app-anim" aria-hidden="true">
+              <span class="blade"></span>
+              <span class="blade"></span>
+              <span class="blade"></span>
+              <span class="core"></span>
+            </div>
+          </article>
+          <article class="app-card" data-app="dynamo">
+            <h3>Dynamo</h3>
+            <div class="app-anim" aria-hidden="true">
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="core"></span>
+            </div>
+          </article>
+        </section>
+
+        <aside id="ui" class="layer" aria-label="Presentation controls and progress">
+          <div id="progress">
+            <span class="label">Step</span>
+            <span id="stepValue">0 / 11</span>
+          </div>
+          <div id="hint">Right Arrow / Space: Next page &middot; Left Arrow: Previous page &middot; R: Reload</div>
+        </aside>
+      </div>
     </main>
 
     <script src="app.js" defer></script>
