@@ -14,14 +14,15 @@ Single-scene, keyboard-controlled browser presentation for Engineering Physics (
 - `ArrowLeft`: previous dialogue line (or previous step last line)
 - `R`: reload
 
-Steps run from `0` to `5`:
+Steps run from `0` to `6`:
 
-0. Intro
+0. Hook
 1. Charge separation
 2. EMF creation
 3. Current flow
 4. Lenz's law
-5. Applications / finale
+5. Energy conversion (mechanical -> electrical)
+6. Applications / finale
 
 ## Presentation-complete additions
 
@@ -29,6 +30,7 @@ Steps run from `0` to `5`:
 - Dedicated explanation layer in `#overlay` (`#explanation`)
 - Step-synced one-line presenter explanation with smooth fade transitions
 - Full script system with per-step `lines[]` dialogue progression
+- Current-direction arrows, Lenz resistance behavior, and energy-flow arrows
 
 ## Run locally
 

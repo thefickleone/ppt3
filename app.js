@@ -2,15 +2,15 @@
   "use strict";
 
   const NS = "http://www.w3.org/2000/svg";
-  const MAX_STEP = 5;
+  const MAX_STEP = 6;
   const steps = [
     {
-      title: "Motional EMF",
+      title: "Hook",
       subtitle: "How does motion become electricity?",
       lines: [
-        "A moving conductor in a magnetic field begins the induction story.",
-        "Magnetic force shifts charges inside the rod and starts separation.",
-        "That separation is the origin of motional EMF."
+        "We begin with a simple question: how can pure motion create electrical output?",
+        "No circuit tricks yet, just motion and a magnetic field.",
+        "Now watch how charge behavior reveals the answer."
       ]
     },
     {
@@ -26,9 +26,9 @@
       title: "EMF Creation",
       subtitle: "Potential difference builds across the rod.",
       lines: [
-        "Charge separation creates an internal electric field in the rod.",
-        "The field grows until it balances magnetic driving on charges.",
-        "Motional EMF is set by epsilon = B l v."
+        "Charge separation causes an internal electric field to appear inside the rod.",
+        "Cause to effect: magnetic push separates charge, electric field pushes back.",
+        "This balance sets the motional EMF magnitude: epsilon equals B l v."
       ]
     },
     {
@@ -36,8 +36,8 @@
       subtitle: "A closed loop lets current circulate.",
       lines: [
         "Now the circuit closes and the voltage has a complete path.",
-        "Charges circulate through the loop as observable current.",
-        "Mechanical motion is now converted into electrical power flow."
+        "Moving particles show current direction around the full loop.",
+        "Current is now sustained by continued rod motion in the magnetic field."
       ]
     },
     {
@@ -46,16 +46,25 @@
       lines: [
         "The induced current creates a magnetic effect opposing the motion.",
         "That opposition appears as an effective resisting force.",
-        "To maintain speed, external work must continuously be supplied."
+        "Without extra input, the rod motion slows under this resistance."
+      ]
+    },
+    {
+      title: "Energy Conversion",
+      subtitle: "Mechanical -> Electrical",
+      lines: [
+        "External mechanical work enters the system as rod/generator motion.",
+        "Energy-flow arrows show conversion from mechanical input to electrical output.",
+        "The converter stage links force, motion, and current into usable power."
       ]
     },
     {
       title: "Applications",
-      subtitle: "Mechanical motion powers real electrical loads.",
+      subtitle: "Generator to city-scale power",
       lines: [
-        "This same principle drives real electric generators.",
-        "Rotation in magnetic fields induces usable electrical output.",
-        "From labs to cities, motion becomes electricity at scale."
+        "A generator is this same physics repeated continuously by rotation.",
+        "Electrical output powers distributed loads, visualized here as city lighting.",
+        "Motional EMF scales from classroom experiment to real infrastructure."
       ]
     }
   ];
@@ -85,6 +94,7 @@
     generatorSpin: 0,
     rodBaseX: 140,
     lenzPhase: 0,
+    energyPhase: 0,
     overlayTimer: null,
     lastTs: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -192,6 +202,21 @@
     const lenzGroup = makeAnim(svgEl("g", { id: "lenzGroup" }), 0);
     lenzGroup.append(svgEl("line", { x1: "820", y1: "255", x2: "690", y2: "255", class: "lenz-arrow", "marker-end": "url(#arrowHead)" }));
 
+    const loopDirection = makeAnim(svgEl("g", { id: "loopDirection" }), 0);
+    loopDirection.append(
+      svgEl("line", { x1: "440", y1: "455", x2: "440", y2: "390", class: "direction-arrow", "marker-end": "url(#arrowHead)" }),
+      svgEl("line", { x1: "480", y1: "485", x2: "560", y2: "485", class: "direction-arrow", "marker-end": "url(#arrowHead)" }),
+      svgEl("line", { x1: "860", y1: "360", x2: "860", y2: "430", class: "direction-arrow", "marker-end": "url(#arrowHead)" }),
+      svgEl("line", { x1: "820", y1: "332", x2: "785", y2: "332", class: "direction-arrow", "marker-end": "url(#arrowHead)" })
+    );
+
+    const energyFlow = makeAnim(svgEl("g", { id: "energyFlow" }), 0);
+    energyFlow.append(
+      svgEl("line", { x1: "320", y1: "220", x2: "500", y2: "220", class: "mech-arrow", "marker-end": "url(#arrowHead)" }),
+      svgEl("line", { x1: "700", y1: "220", x2: "900", y2: "220", class: "elec-arrow", "marker-end": "url(#arrowHead)" }),
+      svgEl("line", { x1: "600", y1: "245", x2: "600", y2: "290", class: "energy-link", "marker-end": "url(#arrowHead)" })
+    );
+
     const generator = makeAnim(svgEl("g", { id: "generator" }), 0);
     generator.append(
       svgEl("circle", { cx: "600", cy: "335", r: "62", class: "generator-ring" }),
@@ -211,7 +236,7 @@
       }
     });
 
-    svg.append(magneticField, circuitPath, currentParticles, electricField, lenzGroup, rodGroup, generator, skyline);
+    svg.append(magneticField, circuitPath, currentParticles, electricField, loopDirection, lenzGroup, energyFlow, rodGroup, generator, skyline);
 
     return {
       magneticField,
@@ -223,7 +248,9 @@
       circuitPath,
       currentParticles,
       particles,
+      loopDirection,
       lenzGroup,
+      energyFlow,
       generator,
       skyline,
       circuitLen: circuitPath.getTotalLength()
@@ -269,8 +296,8 @@
     if (!instant) {
       scene.electricField.style.opacity = "0";
       scene.lenzGroup.style.opacity = "0";
-      scene.generator.style.opacity = state.step === 5 ? "0.35" : scene.generator.style.opacity;
-      scene.skyline.style.opacity = state.step === 5 ? "0.25" : scene.skyline.style.opacity;
+      scene.generator.style.opacity = state.step >= 5 ? "0.35" : scene.generator.style.opacity;
+      scene.skyline.style.opacity = state.step >= 5 ? "0.25" : scene.skyline.style.opacity;
       state.currentSpeedTarget = 0;
     }
 
@@ -337,13 +364,15 @@
     reveal(scene.electricField, levels.electric ?? 0, 120);
     reveal(scene.circuitPath, levels.circuit ?? 0, 140);
     reveal(scene.currentParticles, levels.current ?? 0, 220);
+    reveal(scene.loopDirection, levels.direction ?? 0, 180);
     reveal(scene.lenzGroup, levels.lenz ?? 0, 170);
+    reveal(scene.energyFlow, levels.energy ?? 0, 210);
     reveal(scene.generator, levels.generator ?? 0, 140);
     reveal(scene.skyline, levels.skyline ?? 0, 240);
   }
 
   function resetVisuals() {
-    setFocus({ magnetic: 0.2, rod: 0, electric: 0, circuit: 0, current: 0, lenz: 0, generator: 0, skyline: 0 });
+    setFocus({ magnetic: 0.2, rod: 0, electric: 0, circuit: 0, current: 0, direction: 0, lenz: 0, energy: 0, generator: 0, skyline: 0 });
     scene.circuitPath.classList.remove("drawn");
     scene.circuitPath.style.strokeDashoffset = "1300";
     scene.skyline.classList.remove("lights-on");
@@ -359,7 +388,7 @@
 
   function intro(progress) {
     const magnetic = 0.22 + progress * 0.1;
-    setFocus({ magnetic });
+    setFocus({ magnetic, rod: 0 });
     elements.title.classList.add("intro-title");
     elements.subtitle.classList.add("intro-subtitle");
   }
@@ -380,25 +409,31 @@
 
   function current(progress) {
     emf(1);
-    setFocus({ magnetic: 0.32, rod: 0.92, electric: 0.78, circuit: 1, current: 0.55 + progress * 0.45 });
+    setFocus({ magnetic: 0.32, rod: 0.92, electric: 0.78, circuit: 1, current: 0.55 + progress * 0.45, direction: 0.25 + progress * 0.75 });
     setCircuitProgress(progress);
-    state.currentSpeedTarget = 80 + progress * 75;
+    state.currentSpeedTarget = 90 + progress * 90;
   }
 
   function lenz(progress) {
     current(1);
-    setFocus({ magnetic: 0.3, rod: 0.95, electric: 0.74, circuit: 1, current: 1, lenz: 0.3 + progress * 0.7 });
-    state.rodBaseX = 410;
+    setFocus({ magnetic: 0.3, rod: 0.95, electric: 0.74, circuit: 1, current: 1, direction: 1, lenz: 0.3 + progress * 0.7 });
+    state.rodBaseX = 420 - progress * 18;
     setTranslate(scene.rodGroup, state.rodBaseX, 320, 0);
-    state.currentSpeedTarget = 180 + progress * 50;
+    state.currentSpeedTarget = 70 + progress * 20;
+  }
+
+  function energyConversion(progress) {
+    lenz(1);
+    setFocus({ magnetic: 0.24, rod: 0.8 - progress * 0.5, electric: 0.3 * (1 - progress), circuit: 0.58, current: 0.9, direction: 0.85, lenz: 0.25, energy: 0.25 + progress * 0.75, generator: 0.42 + progress * 0.58, skyline: 0.2 + progress * 0.2 });
+    state.currentSpeedTarget = 105 + progress * 25;
   }
 
   function applications(progress) {
-    lenz(1);
-    setFocus({ magnetic: 0.24, rod: 1 - progress, electric: 0.2 * (1 - progress), circuit: 0.45, current: 1, lenz: 0.35 * (1 - progress), generator: 0.35 + progress * 0.65, skyline: 0.45 + progress * 0.55 });
+    energyConversion(1);
+    setFocus({ magnetic: 0.22, rod: 0.2 * (1 - progress), electric: 0, circuit: 0.45, current: 0.95, direction: 0.85, lenz: 0, energy: 0.35 + progress * 0.65, generator: 0.9 + progress * 0.1, skyline: 0.45 + progress * 0.55 });
     reveal(scene.rodGroup, 0, 120);
     scene.skyline.classList.add("lights-on");
-    state.currentSpeedTarget = 220 + progress * 60;
+    state.currentSpeedTarget = 135 + progress * 45;
   }
 
   function renderStep() {
@@ -411,7 +446,8 @@
     if (state.step === 2) emf(progress);
     if (state.step === 3) current(progress);
     if (state.step === 4) lenz(progress);
-    if (state.step === 5) applications(progress);
+    if (state.step === 5) energyConversion(progress);
+    if (state.step === 6) applications(progress);
   }
 
   function animateFrame(ts) {
@@ -437,9 +473,15 @@
       setTranslate(scene.rodGroup, state.rodBaseX + resistance, 320, 0);
     }
 
-    if (state.step === 5) {
+    if (state.step >= 5) {
       state.generatorSpin += state.reducedMotion ? 0.3 : 2.3;
       setTranslate(scene.generator, 0, 0, state.generatorSpin);
+    }
+
+    if (state.step >= 5) {
+      state.energyPhase += dt * 4;
+      const shimmer = 0.6 + 0.4 * Math.sin(state.energyPhase * Math.PI);
+      scene.energyFlow.style.opacity = String(Math.max(0.28, shimmer));
     }
 
     window.requestAnimationFrame(animateFrame);
