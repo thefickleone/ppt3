@@ -3,6 +3,33 @@
 
   const NS = "http://www.w3.org/2000/svg";
   const MAX_PAGE = 11;
+  const CONFIG = {
+    timing: {
+      overlayFadeMs: 170,
+      pageTransitionMs: 260,
+      inputCooldownMs: 95,
+      reloadCooldownMs: 120
+    },
+    circuit: {
+      dashTotal: 1300
+    },
+    flux: {
+      leftX: 440,
+      maxWidth: 420,
+      baseOpacity: 0.16,
+      opacityRange: 0.74,
+      baseFillOpacity: 0.08,
+      fillOpacityRange: 0.3
+    },
+    eddyField: {
+      leftX: 540,
+      rightX: 720
+    },
+    slider: {
+      minX: 40,
+      width: 600
+    }
+  };
 
   const elements = {
     presentation: document.getElementById("presentation"),
@@ -52,6 +79,8 @@
     lenzPhase: 0,
     energyPhase: 0,
     overlayTimer: null,
+    transitionTimer: null,
+    isTransitioning: false,
     inputCooldownUntil: 0,
     sliderDragging: false,
     parallaxTargetX: 0,
@@ -424,7 +453,7 @@
       elements.subtitle.textContent = copy.subtitle;
       elements.explanation.textContent = copy.explanation;
       elements.presentation.classList.remove("overlay-out");
-    }, state.reducedMotion ? 0 : 170);
+    }, state.reducedMotion ? 0 : CONFIG.timing.overlayFadeMs);
   }
 
   function updateProgressUI() {
@@ -433,9 +462,15 @@
 
   function setPage(nextPage, instant = false) {
     const clamped = Math.max(0, Math.min(MAX_PAGE, nextPage));
-    if (clamped === state.page && !instant) return;
+    if (clamped === state.page && !instant && !state.isTransitioning) return;
+
+    if (state.transitionTimer) {
+      window.clearTimeout(state.transitionTimer);
+      state.transitionTimer = null;
+    }
 
     const token = ++state.transitionToken;
+    state.isTransitioning = true;
     scene.skyline.classList.remove("lights-on");
     scene.circuitPath.classList.remove("drawn");
     elements.presentation.classList.add("scene-transitioning");
@@ -447,8 +482,8 @@
       state.currentSpeedTarget = 0;
     }
 
-    const delay = instant || state.reducedMotion ? 0 : 260;
-    window.setTimeout(() => {
+    const delay = instant || state.reducedMotion ? 0 : CONFIG.timing.pageTransitionMs;
+    state.transitionTimer = window.setTimeout(() => {
       if (token !== state.transitionToken) return;
       state.page = clamped;
       if (state.page === 3) {
@@ -461,6 +496,8 @@
       elements.presentation.dataset.page = String(state.page);
       renderPage();
       elements.presentation.classList.remove("scene-transitioning");
+      state.isTransitioning = false;
+      state.transitionTimer = null;
     }, delay);
   }
 
@@ -483,23 +520,23 @@
   }
 
   function setCircuitProgress(progress) {
-    const dashTotal = 1300;
+    const dashTotal = CONFIG.circuit.dashTotal;
     scene.circuitPath.style.opacity = String(0.2 + progress * 0.8);
     scene.circuitPath.style.strokeDashoffset = String(dashTotal * (1 - progress));
   }
 
   function updateFluxArea(rodX, intensity) {
-    const width = Math.max(0, Math.min(420, rodX - 440));
+    const width = Math.max(0, Math.min(CONFIG.flux.maxWidth, rodX - CONFIG.flux.leftX));
     scene.fluxArea.setAttribute("width", width.toFixed(2));
-    scene.fluxArea.style.opacity = String(0.16 + intensity * 0.74);
-    scene.fluxArea.style.fillOpacity = String(0.08 + intensity * 0.3);
+    scene.fluxArea.style.opacity = String(CONFIG.flux.baseOpacity + intensity * CONFIG.flux.opacityRange);
+    scene.fluxArea.style.fillOpacity = String(CONFIG.flux.baseFillOpacity + intensity * CONFIG.flux.fillOpacityRange);
   }
 
   function getEddyOverlap(rodX) {
     const rodLeft = rodX;
     const rodRight = rodX + 320;
-    const fieldLeft = 540;
-    const fieldRight = 720;
+    const fieldLeft = CONFIG.eddyField.leftX;
+    const fieldRight = CONFIG.eddyField.rightX;
     return Math.max(0, Math.min(rodRight, fieldRight) - Math.max(rodLeft, fieldLeft));
   }
 
@@ -534,7 +571,7 @@
 
   function updateSimulationUI() {
     elements.velocityValue.textContent = state.simulationVelocity.toFixed(2);
-    const x = 40 + state.simulationVelocity * 600;
+    const x = CONFIG.slider.minX + state.simulationVelocity * CONFIG.slider.width;
     elements.velocityActive.setAttribute("x2", x.toFixed(2));
     elements.velocityThumb.setAttribute("cx", x.toFixed(2));
     elements.velocityThumbGlow.setAttribute("cx", x.toFixed(2));
@@ -875,17 +912,17 @@
     if (event.code === "ArrowRight" || event.code === "Space") {
       event.preventDefault();
       nextPage();
-      state.inputCooldownUntil = now + 95;
+      state.inputCooldownUntil = now + CONFIG.timing.inputCooldownMs;
       return;
     }
     if (event.code === "ArrowLeft") {
       event.preventDefault();
       prevPage();
-      state.inputCooldownUntil = now + 95;
+      state.inputCooldownUntil = now + CONFIG.timing.inputCooldownMs;
       return;
     }
     if (event.code === "KeyR") {
-      state.inputCooldownUntil = now + 120;
+      state.inputCooldownUntil = now + CONFIG.timing.reloadCooldownMs;
       window.location.reload();
     }
   });
