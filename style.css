@@ -82,11 +82,14 @@ body {
 
 #overlay {
   z-index: 2;
-  display: grid;
-  place-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   text-align: center;
+  padding: clamp(18px, 3vw, 36px);
   pointer-events: none;
-  gap: 0.75rem;
+  gap: 0.35rem;
 }
 
 #title {
@@ -122,92 +125,22 @@ body {
   pointer-events: none;
 }
 
-#infoPanel {
-  align-self: center;
-  width: min(920px, 82vw);
-  display: grid;
-  gap: 0.55rem;
-  padding: 0.8rem 1rem;
-  background: rgba(4, 8, 20, 0.54);
-  border: 1px solid rgba(100, 185, 255, 0.25);
+#explanation {
+  margin-top: auto;
+  width: min(980px, 86vw);
+  padding: 0.85rem 1.05rem;
   border-radius: 14px;
+  border: 1px solid rgba(112, 182, 255, 0.24);
+  background: rgba(4, 8, 20, 0.58);
   backdrop-filter: blur(8px);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.28);
-  transition: opacity 700ms ease, transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-#infoPanel .chip {
-  justify-self: start;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.74rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(193, 227, 255, 0.95);
-  border: 1px solid rgba(100, 197, 255, 0.3);
-  background: rgba(17, 38, 76, 0.62);
-}
-
-#stepCaption {
-  margin: 0;
-  font-size: clamp(0.95rem, 1.75vw, 1.16rem);
-  line-height: 1.45;
-  color: rgba(228, 236, 255, 0.95);
+  font-size: clamp(1rem, 1.85vw, 1.24rem);
+  line-height: 1.46;
   letter-spacing: 0.01em;
-}
-
-#legend {
-  display: flex;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-  min-height: 1.4rem;
-}
-
-#legend .key {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.38rem;
-  font-size: 0.78rem;
-  color: rgba(190, 214, 243, 0.92);
-}
-
-#legend .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  box-shadow: 0 0 8px currentColor;
-}
-
-#notesPanel {
-  margin-top: 0.2rem;
-  padding-top: 0.5rem;
-  border-top: 1px dashed rgba(115, 170, 246, 0.26);
-  font-size: 0.78rem;
-  line-height: 1.45;
-  color: rgba(170, 197, 226, 0.94);
-}
-
-#helpPanel {
-  display: flex;
-  gap: 0.7rem;
-  flex-wrap: wrap;
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(160, 185, 214, 0.72);
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 420ms ease, transform 420ms ease;
-}
-
-#presentation.show-help #helpPanel {
+  color: rgba(231, 240, 255, 0.96);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
   opacity: 1;
   transform: translateY(0);
-}
-
-#presentation.hide-notes #notesPanel,
-.hidden {
-  display: none;
+  transition: opacity 700ms ease, transform 800ms cubic-bezier(0.22, 1, 0.36, 1), filter 700ms ease;
 }
 
 #progress {
@@ -265,9 +198,10 @@ body {
   filter: blur(5px);
 }
 
-#presentation.overlay-out #infoPanel {
+#presentation.overlay-out #explanation {
   opacity: 0;
   transform: translateY(14px);
+  filter: blur(2px);
 }
 
 .intro-title {
@@ -294,10 +228,9 @@ body {
 }
 
 .magnetic-cross {
-  fill: rgba(124, 212, 255, 0.33);
-  font-size: 20px;
-  font-weight: 600;
-  font-family: "SF Mono", Menlo, Consolas, monospace;
+  stroke: rgba(124, 212, 255, 0.36);
+  stroke-width: 1.5;
+  stroke-linecap: round;
 }
 
 .rod {
@@ -373,11 +306,6 @@ body {
   filter: var(--line-glow);
 }
 
-.lenz-label {
-  fill: #d4e8ff;
-  font-size: 22px;
-}
-
 .generator-ring {
   fill: rgba(89, 243, 255, 0.12);
   stroke: rgba(148, 222, 255, 0.95);
@@ -436,8 +364,7 @@ body {
   .electron,
   #title,
   #subtitle,
-  #infoPanel,
-  #helpPanel,
+  #explanation,
   .circuit,
   .window {
     transition-duration: 0.01ms !important;

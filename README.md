@@ -13,8 +13,6 @@ Single-scene, keyboard-controlled browser presentation for Engineering Physics (
 - `ArrowRight` or `Space`: next step
 - `ArrowLeft`: previous step
 - `R`: reload
-- `H`: toggle help hints
-- `N`: toggle presenter notes
 
 Steps run from `0` to `5`:
 
@@ -27,10 +25,9 @@ Steps run from `0` to `5`:
 
 ## Presentation-complete additions
 
-- Step-specific teaching captions synchronized with transitions
-- Equation/state chips for quick concept framing
-- Color legend per step (charge/field/current meaning)
-- Optional presenter notes overlay for live delivery
+- Clean visual-only physics scene in `#scene`
+- Dedicated explanation layer in `#overlay` (`#explanation`)
+- Step-synced one-line presenter explanation with smooth fade transitions
 
 ## Run locally
 
