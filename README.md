@@ -4,7 +4,7 @@ Single-scene, keyboard-controlled browser presentation for Engineering Physics (
 
 ## Files
 
-- `index.html` - Layered presentation shell (`#background`, `#scene`, `#overlay`, `#ui`)
+- `index.html` - Layered presentation shell (`#background`, `#scene`, `#storyPanel`, `#ui`)
 - `style.css` - Dark neon visual theme and animation styling
 - `app.js` - Step system, SVG scene construction, and animation runtime
 
@@ -32,7 +32,7 @@ Pages run from `0` to `11`:
 ## Presentation-complete additions
 
 - Clean visual-only physics scene in `#scene`
-- Dedicated explanation layer in `#overlay` (`#explanation`)
+- Dedicated story panel layer in `#storyPanel` (`#title`, `#subtitle`, `#explanation`)
 - Page-synced chapter explanation with smooth fade transitions
 - Full page-based chapter system (`0-11`) with explicit `page*` render functions
 - Current-direction arrows, Lenz resistance behavior, and energy-flow arrows

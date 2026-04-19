@@ -29,20 +29,19 @@
   const elements = {
     presentation: document.getElementById("presentation"),
     scene: document.getElementById("scene"),
+    storyPanel: document.getElementById("storyPanel"),
     svg: document.getElementById("sceneSvg"),
     bgGrid: document.querySelector("#background .bg-grid"),
     bgGradient: document.querySelector("#background .bg-gradient"),
     title: document.getElementById("title"),
     subtitle: document.getElementById("subtitle"),
     stepValue: document.getElementById("stepValue"),
-    explanation: document.getElementById("explanation"),
-    applicationCards: Array.from(document.querySelectorAll("#applicationCards .app-card"))
+    explanation: document.getElementById("explanation")
   };
 
   if (
-    !elements.presentation || !elements.scene || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
-    !elements.bgGrid || !elements.bgGradient ||
-    elements.applicationCards.length === 0
+    !elements.presentation || !elements.scene || !elements.storyPanel || !elements.svg || !elements.title || !elements.subtitle || !elements.stepValue || !elements.explanation ||
+    !elements.bgGrid || !elements.bgGradient
   ) {
     return;
   }
@@ -78,78 +77,18 @@
   const scene = initScene(elements.svg);
 
   const pages = [
-    {
-      title: "Motional EMF",
-      subtitle: "How does motion become electricity?",
-      explanation: "",
-      render: pageIntro
-    },
-    {
-      title: "Real-World Examples",
-      subtitle: "Motion and electricity already surround us",
-      explanation: "Generator, turbine, and dynamo are real systems using this same motional EMF principle.",
-      render: pageExamples
-    },
-    {
-      title: "Rod Question",
-      subtitle: "What if a conductor moves through B?",
-      explanation: "What if the rod starts moving?",
-      render: pageRodQuestion
-    },
-    {
-      title: "Motion and Separation",
-      subtitle: "v x B pushes charges apart",
-      explanation: "Chapter 4: As the rod moves, electrons drift and clear polarity builds at opposite ends.",
-      render: pageMotion
-    },
-    {
-      title: "EMF Formation",
-      subtitle: "Internal field appears",
-      explanation: "Chapter 5: As the swept flux area grows, changing magnetic flux drives a measurable EMF.",
-      render: pageEMF
-    },
-    {
-      title: "Derivation",
-      subtitle: "epsilon = B l v",
-      explanation: "Chapter 6: Emphasize the relation between field strength, rod length, and speed.",
-      render: pageDerivation
-    },
-    {
-      title: "Simulation View",
-      subtitle: "Full setup before current",
-      explanation: "Higher velocity increases rod speed, charge separation, and EMF intensity.",
-      render: pageSimulation
-    },
-    {
-      title: "Current Flow",
-      subtitle: "Closed loop conduction",
-      explanation: "",
-      render: pageCurrent
-    },
-    {
-      title: "Lenz's Law",
-      subtitle: "Opposition to change",
-      explanation: "Chapter 9: Induced effects resist motion, slowing the rod unless extra work is supplied.",
-      render: pageLenz
-    },
-    {
-      title: "Energy Conversion",
-      subtitle: "Mechanical to electrical",
-      explanation: "Chapter 10: Energy arrows show mechanical input transformed into electrical output.",
-      render: pageEnergy
-    },
-    {
-      title: "Applications",
-      subtitle: "Generator to city power",
-      explanation: "Chapter 11: Rotational induction scales to practical generation and city lighting.",
-      render: pageApplications
-    },
-    {
-      title: "Eddy Currents",
-      subtitle: "Induced loops in bulk conductors",
-      explanation: "Eddy currents are induced mainly when the rod enters or exits the localized magnetic field region.",
-      render: pageEddy
-    }
+    { title: "Motional EMF", subtitle: "How does motion become electricity?", explanation: "", layout: "center", render: pageIntro },
+    { title: "Real-World Examples", subtitle: "Motion and electricity already surround us", explanation: "Generator, turbine, and dynamo are real systems using this same motional EMF principle.", layout: "left", render: pageExamples },
+    { title: "Rod Question", subtitle: "What if a conductor moves through B?", explanation: "What if the rod starts moving?", layout: "left", render: pageRodQuestion },
+    { title: "Motion and Separation", subtitle: "v x B pushes charges apart", explanation: "Chapter 4: As the rod moves, electrons drift and clear polarity builds at opposite ends.", layout: "right", render: pageMotion },
+    { title: "EMF Formation", subtitle: "Internal field appears", explanation: "Chapter 5: As the swept flux area grows, changing magnetic flux drives a measurable EMF.", layout: "right", render: pageEMF },
+    { title: "Derivation", subtitle: "epsilon = B l v", explanation: "Chapter 6: Emphasize the relation between field strength, rod length, and speed.", layout: "left", render: pageDerivation },
+    { title: "Simulation View", subtitle: "Full setup before current", explanation: "Higher velocity increases rod speed, charge separation, and EMF intensity.", layout: "right", render: pageSimulation },
+    { title: "Current Flow", subtitle: "Closed loop conduction", explanation: "", layout: "left", render: pageCurrent },
+    { title: "Lenz's Law", subtitle: "Opposition to change", explanation: "Chapter 9: Induced effects resist motion, slowing the rod unless extra work is supplied.", layout: "right", render: pageLenz },
+    { title: "Energy Conversion", subtitle: "Mechanical to electrical", explanation: "Chapter 10: Energy arrows show mechanical input transformed into electrical output.", layout: "center", render: pageEnergy },
+    { title: "Applications", subtitle: "Generator to city power", explanation: "Chapter 11: Rotational induction scales to practical generation and city lighting.", layout: "left", render: pageApplications },
+    { title: "Eddy Currents", subtitle: "Induced loops in bulk conductors", explanation: "Eddy currents are induced mainly when the rod enters or exits the localized magnetic field region.", layout: "right", render: pageEddy }
   ];
 
   function svgEl(tag, attrs = {}) {
@@ -436,6 +375,7 @@
       elements.title.textContent = copy.title;
       elements.subtitle.textContent = copy.subtitle;
       elements.explanation.textContent = copy.explanation;
+      elements.presentation.dataset.layout = copy.layout || "center";
       elements.presentation.classList.remove("overlay-out");
     }, state.reducedMotion ? 0 : CONFIG.timing.overlayFadeMs);
   }
@@ -499,11 +439,6 @@
     }
   }
 
-  function setActiveApplicationCard(card) {
-    elements.applicationCards.forEach((item) => {
-      item.classList.toggle("active", item === card);
-    });
-  }
 
   function setCircuitProgress(progress) {
     const dashTotal = CONFIG.circuit.dashTotal;
@@ -862,18 +797,6 @@
       window.location.reload();
     }
   });
-
-  elements.applicationCards.forEach((card) => {
-    card.addEventListener("click", () => setActiveApplicationCard(card));
-    card.addEventListener("keydown", (event) => {
-      if (event.code === "Enter" || event.code === "Space") {
-        event.preventDefault();
-        setActiveApplicationCard(card);
-      }
-    });
-  });
-
-  setActiveApplicationCard(elements.applicationCards[0]);
 
 
   setPage(0, true);

@@ -81,40 +81,49 @@ body {
   display: block;
 }
 
-#overlay {
+#storyPanel {
   z-index: 2;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(640px, calc(100vw - 64px));
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  text-align: center;
-  padding: clamp(18px, 3vw, 36px);
+  gap: clamp(0.45rem, 1.1vw, 0.8rem);
+  padding: clamp(16px, 2.2vw, 28px);
+  border-radius: 20px;
+  border: 1px solid rgba(126, 226, 255, 0.24);
+  background: rgba(8, 14, 28, 0.42);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 0 0 1px rgba(89, 243, 255, 0.08) inset, 0 14px 32px rgba(3, 8, 18, 0.45), 0 0 24px rgba(89, 243, 255, 0.12);
   pointer-events: none;
-  gap: 0.5rem;
+  transition: transform 360ms var(--ease-ui), opacity 420ms ease, border-color 320ms ease;
 }
 
 #title {
   margin: 0;
-  font-size: clamp(2.4rem, 6vw, 5rem);
-  letter-spacing: 0.06em;
+  font-size: clamp(1.8rem, 3.8vw, 3.2rem);
+  letter-spacing: 0.04em;
   line-height: 1.05;
-  opacity: 0.72;
-  transform: translateY(8px);
-  filter: blur(2px);
-  transition: opacity 900ms var(--ease-ui), transform 900ms var(--ease-ui), filter 900ms ease-in-out;
+  opacity: 0.9;
+  transform: translateY(0);
+  filter: blur(0);
+  transition: opacity 760ms var(--ease-ui), transform 760ms var(--ease-ui), filter 760ms ease-in-out;
   text-shadow: 0 0 18px rgba(89, 243, 255, 0.3);
 }
 
 #subtitle {
   margin: 0;
-  font-size: clamp(1rem, 2.4vw, 1.65rem);
+  font-size: clamp(1rem, 1.9vw, 1.35rem);
   color: var(--text-secondary);
   letter-spacing: 0.02em;
-  line-height: 1.38;
-  opacity: 0.72;
-  transform: translateY(10px);
-  filter: blur(2px);
-  transition: opacity 900ms var(--ease-ui), transform 900ms var(--ease-ui), filter 900ms ease-in-out;
+  line-height: 1.42;
+  opacity: 0.94;
+  transform: translateY(0);
+  filter: blur(0);
+  transition: opacity 760ms var(--ease-ui), transform 760ms var(--ease-ui), filter 760ms ease-in-out;
 }
 
 #ui {
@@ -127,17 +136,38 @@ body {
 }
 
 #explanation {
-  margin-top: auto;
-  width: min(860px, 80vw);
+  width: 100%;
   padding: 0;
-  font-size: clamp(1rem, 1.85vw, 1.24rem);
+  font-size: clamp(0.96rem, 1.45vw, 1.08rem);
   line-height: 1.46;
   letter-spacing: 0.014em;
   color: rgba(231, 240, 255, 0.96);
-  text-shadow: 0 0 14px rgba(90, 160, 255, 0.22);
+  text-shadow: 0 0 10px rgba(90, 160, 255, 0.2);
   opacity: 1;
   transform: translateY(0);
   transition: opacity 760ms ease-in-out, transform 820ms var(--ease-ui), filter 760ms ease-in-out;
+}
+
+#presentation[data-layout="center"] #storyPanel {
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  align-items: center;
+}
+
+#presentation[data-layout="left"] #storyPanel {
+  left: clamp(26px, 5vw, 84px);
+  transform: translate(0, -50%);
+  text-align: left;
+  align-items: flex-start;
+}
+
+#presentation[data-layout="right"] #storyPanel {
+  left: auto;
+  right: clamp(26px, 5vw, 84px);
+  transform: translate(0, -50%);
+  text-align: left;
+  align-items: flex-start;
 }
 
 #examplesCards {
@@ -278,10 +308,6 @@ body {
   transition-delay: 520ms;
 }
 
-#presentation[data-page="1"] #explanation {
-  opacity: 0;
-}
-
 #applicationCards {
   position: absolute;
   left: 50%;
@@ -405,10 +431,6 @@ body {
   pointer-events: auto;
 }
 
-#presentation[data-page="10"] #explanation {
-  opacity: 0;
-}
-
 #presentation[data-page="2"] #explanation {
   animation: rodQuestionTextIn 1500ms ease-in-out both;
 }
@@ -460,9 +482,8 @@ body {
   filter: blur(0px);
 }
 
-#presentation[data-page="0"] #overlay {
-  justify-content: center;
-  gap: 0;
+#presentation[data-page="0"] #storyPanel {
+  gap: 0.2rem;
 }
 
 #presentation[data-page="0"] #title {
@@ -475,17 +496,12 @@ body {
 }
 
 #presentation[data-page="0"] #subtitle {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-  width: min(840px, 82vw);
-  font-size: clamp(1.2rem, 3.2vw, 2rem);
-  letter-spacing: 0.06em;
-  opacity: 0.2;
-  color: rgba(180, 220, 255, 0.34);
-  filter: blur(0.4px);
+  width: 100%;
+  font-size: clamp(1.05rem, 2.3vw, 1.5rem);
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+  color: rgba(180, 220, 255, 0.9);
+  filter: blur(0);
   text-shadow: 0 0 12px rgba(89, 243, 255, 0.18);
   animation: introQuestionReveal 1200ms ease-in-out both;
 }
