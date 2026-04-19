@@ -100,6 +100,7 @@
     nextAdvanceAt: 0,
     animationDelayMs: 220,
     animationDurationMs: 980,
+    inputCooldownUntil: 0,
     lastTs: 0,
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches
   };
@@ -282,7 +283,7 @@
       "3:1": { minAdvanceMs: 820, animationDelayMs: 220, animationDurationMs: 980 },
       "4:1": { minAdvanceMs: 850, animationDelayMs: 260, animationDurationMs: 1080 }
     };
-    return map[key] || { minAdvanceMs: 620, animationDelayMs: 220, animationDurationMs: 940 };
+    return map[key] || { minAdvanceMs: 700, animationDelayMs: 220, animationDurationMs: 980 };
   }
 
   function getWithinLineMotion() {
@@ -527,17 +528,24 @@
   }
 
   window.addEventListener("keydown", (event) => {
+    if (event.repeat) return;
+    const now = performance.now();
+    if (now < state.inputCooldownUntil) return;
+
     if (event.code === "ArrowRight" || event.code === "Space") {
       event.preventDefault();
       advanceScript();
+      state.inputCooldownUntil = now + 95;
       return;
     }
     if (event.code === "ArrowLeft") {
       event.preventDefault();
       rewindScript();
+      state.inputCooldownUntil = now + 95;
       return;
     }
     if (event.code === "KeyR") {
+      state.inputCooldownUntil = now + 120;
       window.location.reload();
     }
   });
